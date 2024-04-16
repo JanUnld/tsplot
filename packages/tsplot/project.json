@@ -1,0 +1,33 @@
+{
+  "name": "tsplot",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/tsplot/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/tsplot",
+        "main": "packages/tsplot/src/index.ts",
+        "tsConfig": "packages/tsplot/tsconfig.lib.json",
+        "assets": [
+          "packages/tsplot/LICENSE",
+          "packages/tsplot/*.{svg,png}",
+          "packages/tsplot/*.md"
+        ]
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "packages/tsplot/jest.config.ts"
+      }
+    }
+  },
+  "tags": []
+}

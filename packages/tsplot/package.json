@@ -1,0 +1,21 @@
+{
+  "name": "tsplot",
+  "version": "0.1.0",
+  "description": "Analyzes the dependencies within a typescript project and generates stats and diagrams",
+  "license": "MIT",
+  "author": "Jan Unnold",
+  "bin": "./src/cli/bin.js",
+  "repository": "https://github.com/JanUnld/tsplot",
+  "homepage": "https://github.com/JanUnld/tsplot#readme",
+  "dependencies": {
+    "@phenomnomnominal/tsquery": "^6.1.3",
+    "commander": "^12.0.0",
+    "consola": "^3.2.3",
+    "fs-extra": "^11.2.0",
+    "minimatch": "^9.0.3",
+    "tslib": "^2.3.0"
+  },
+  "type": "commonjs",
+  "main": "./src/index.js",
+  "typings": "./src/index.d.ts"
+}
