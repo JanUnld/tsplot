@@ -97,4 +97,4 @@ classDiagram
 
 ### Plant UML
 
-![tsplot](packages/tsplot/tsplot.svg)
+![tsplot](./tsplot.svg)
