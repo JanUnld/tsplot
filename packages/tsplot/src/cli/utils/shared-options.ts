@@ -18,10 +18,13 @@ import {
   includeSourceFiles,
 } from '../../lib/filter';
 
+/** @internal */
 const MEMBER_TYPES: MemberType[] = Object.values(MemberType);
 
+/** @internal */
 const DEFAULT_DEPTH = 9999;
 
+/** @internal */
 export interface SharedOptions {
   project: string;
   output?: string;
@@ -52,6 +55,7 @@ export interface SharedOptions {
   excludeNames?: string[];
 }
 
+/** @internal */
 export function setupSharedOptions(command: Command) {
   return (
     command
@@ -122,6 +126,7 @@ export function setupSharedOptions(command: Command) {
   );
 }
 
+/** @internal */
 export function setupLogLevel(options: SharedOptions) {
   consola.options.formatOptions.date = false;
   consola.options.formatOptions.compact = true;
@@ -130,15 +135,18 @@ export function setupLogLevel(options: SharedOptions) {
   if (options.silent) consola.level = -999;
 }
 
+/** @internal */
 export function getTsConfigPath(options = program.opts<SharedOptions>()) {
   return resolve(process.cwd(), options.project);
 }
 
+/** @internal */
 export function logSharedOptions(options: SharedOptions) {
   consola.debug('options:', JSON.stringify(options, null, 2));
   consola.info(`analyzing project at "${getTsConfigPath(options)}"...`);
 }
 
+/** @internal */
 export function resolveProjectView(options: SharedOptions): ProjectView {
   const isRelevantSourceFile = (f: ts.SourceFile) => {
     return !f.isDeclarationFile && !f.fileName.includes('node_modules');
@@ -193,6 +201,7 @@ export function resolveProjectView(options: SharedOptions): ProjectView {
   return projectView;
 }
 
+/** @internal */
 export async function resolveProjectMembersFrom(
   projectView: ProjectView,
   options: SharedOptions
@@ -209,6 +218,7 @@ export async function resolveProjectMembersFrom(
   return deferred ? (await Promise.all(deferred)).flat() : projectView.members;
 }
 
+/** @internal */
 export async function output(data: string, options: SharedOptions) {
   if (options.output) {
     const outputPath = resolve(process.cwd(), options.output);

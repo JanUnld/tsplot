@@ -2,14 +2,17 @@ import { Member, ProjectView } from '../../lib';
 import { entriesToObject, groupSums } from './accumulators';
 import { SharedOptions } from './shared-options';
 
+/** @internal */
 export type Hotspots = Record<string, number>;
 
+/** @internal */
 export interface HotspotOptions extends SharedOptions {
   hotspots?: boolean;
   hotspotThreshold?: number;
   hotspotMax?: number;
 }
 
+/** @internal */
 export async function collectHotspots(
   projectView: ProjectView,
   options?: HotspotOptions,

@@ -1,2 +1,2 @@
-export { diagram, DiagramOptions as DiagramOptions } from './diagram';
-export { stats, StatsOptions as StatOptions } from './stats';
+export { diagram, DiagramOptions } from './diagram';
+export { stats, StatsOptions } from './stats';

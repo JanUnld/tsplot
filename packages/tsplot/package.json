@@ -17,5 +17,16 @@
   },
   "type": "commonjs",
   "main": "./src/index.js",
-  "typings": "./src/index.d.ts"
+  "typings": "./src/index.d.ts",
+  "keywords": [
+    "typescript",
+    "dependency-graph",
+    "graph",
+    "stats",
+    "diagram",
+    "visualization",
+    "mermaid",
+    "plant-uml",
+    "cli"
+  ]
 }

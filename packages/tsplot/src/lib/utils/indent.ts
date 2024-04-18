@@ -1,5 +1,6 @@
 import { EOL } from 'os';
 
+/** @internal */
 export function indent(
   str: string,
   options?: { level?: number; size?: number }

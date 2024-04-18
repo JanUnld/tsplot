@@ -1,14 +1,17 @@
 import { ProjectFile } from '../../lib';
 
+/** @internal */
 export interface LinesOfCodeOptions {
   linesOfCode?: boolean;
   minLinesOfCode?: number;
 }
 
+/** @internal */
 export function collectLinesBreaks(str: string): number {
   return str.split('\n').filter((l) => l.trim().length).length;
 }
 
+/** @internal */
 export async function collectLinesOfCode(
   files: ProjectFile[],
   options: LinesOfCodeOptions

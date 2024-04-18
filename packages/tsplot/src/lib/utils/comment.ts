@@ -1,11 +1,13 @@
 import * as ts from 'typescript';
 
+/** @experimental */
 export interface Comment {
   text: string;
   start: number;
   end: number;
 }
 
+/** @experimental */
 export function resolveLeadingComments(
   node: ts.Node,
   source: ts.SourceFile

@@ -21,6 +21,6 @@
   - [ ] _Sequence diagram?_
 - [ ] Add documentation
 - [ ] Add configuration file support
-- [ ] Publish to NPM
+- [x] Publish to NPM
 - [ ] Code cleanup
 - [ ] Add tests

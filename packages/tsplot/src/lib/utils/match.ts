@@ -1,5 +1,6 @@
 import { minimatch } from 'minimatch';
 
+/** @internal */
 export function matchRegExpOr(
   str: string,
   options: {
@@ -11,6 +12,7 @@ export function matchRegExpOr(
   return pattern instanceof RegExp ? pattern.test(str) : or(str);
 }
 
+/** @internal */
 export function matchRegExpOrStr(pattern: RegExp | string, str: string) {
   return matchRegExpOr(str, {
     pattern,
@@ -18,6 +20,7 @@ export function matchRegExpOrStr(pattern: RegExp | string, str: string) {
   });
 }
 
+/** @internal */
 export function matchRegExpOrGlob(pattern: RegExp | string, path: string) {
   return matchRegExpOr(path, {
     pattern,
