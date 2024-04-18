@@ -1,5 +1,6 @@
 import { EOL } from 'os';
 import { Member } from '../../core';
+import { indent } from '../../utils';
 import { RelationDiagram } from '../relation-diagram';
 import { renderEdge } from '../render-edge';
 import { renderPlantUml } from './render-plant-uml';
@@ -31,7 +32,14 @@ export function renderMemberAsPlantUML(m: Member): string {
     .filter(Boolean)
     .join(', ');
 
-  return `${type} ${m.name}${stereotype ? ` <<${stereotype}>>` : ''}`;
+  const str = `${type} ${m.name}${stereotype ? ` <<${stereotype}>>` : ''}`;
+
+  if (!m.props.length) {
+    return str;
+  } else {
+    const props = m.props.map((p) => `{field} ${p.name}`).join(EOL);
+    return `${str} {${EOL}${indent(props)}${EOL}}`;
+  }
 }
 
 export class PlantUMLClassDiagram extends RelationDiagram {

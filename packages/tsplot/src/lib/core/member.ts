@@ -1,7 +1,9 @@
 import { includes, query } from '@phenomnomnominal/tsquery';
 import * as ts from 'typescript';
+import { appendIdentifierQuery, removeIdentifierQuery } from '../utils';
 import { Decorator, resolveDecorators } from './decorator';
 import { Dependency } from './dependency';
+import { Property, resolveProps } from './property';
 
 export enum MemberType {
   Class = 'class',
@@ -35,8 +37,9 @@ export function toMemberType(kind: ts.SyntaxKind): MemberType | undefined {
 export interface Member {
   selector: string;
   node: ts.Node;
-  decorators: Decorator[];
   deps: Dependency[];
+  decorators: Decorator[];
+  props: Property[];
   type: MemberType;
   name: string;
   isAbstract: boolean;
@@ -60,10 +63,11 @@ export function resolveMembers(source: ts.SourceFile): Member[] {
     .map(
       ({ selector, node }) =>
         ({
-          selector: selector.replace(/\s*>\s*Identifier\s*/, ''),
+          selector: removeIdentifierQuery(selector),
           node: node.parent,
           type: toMemberType(node.parent.kind)!,
           decorators: resolveDecorators(node.parent),
+          props: resolveProps(node.parent),
           deps: [],
           name: node.getText(),
           isAbstract: includes(node.parent, 'AbstractKeyword'),
