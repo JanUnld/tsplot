@@ -1,9 +1,13 @@
 import { includes, query } from '@phenomnomnominal/tsquery';
 import * as ts from 'typescript';
-import { appendIdentifierQuery, removeIdentifierQuery } from '../utils';
-import { Decorator, resolveDecorators } from './decorator';
+import {
+  appendIdentifierToSelector,
+  removeIdentifierFromSelector,
+} from '../utils';
+import { Decorator, getDecoratorsFromNode } from './decorator';
 import { Dependency } from './dependency';
-import { Property, resolveProps } from './property';
+import { getMethodsFromNode, Method } from './method';
+import { getPropsFromNode, Property } from './property';
 
 export enum MemberType {
   Class = 'class',
@@ -40,13 +44,14 @@ export interface Member {
   deps: Dependency[];
   decorators: Decorator[];
   props: Property[];
+  methods: Method[];
   type: MemberType;
   name: string;
   isAbstract: boolean;
   isExported: boolean;
 }
 
-export function resolveMembers(source: ts.SourceFile): Member[] {
+export function getMembersFromSourceFile(source: ts.SourceFile): Member[] {
   const selectors: string[] = [
     'ClassDeclaration > Identifier',
     'InterfaceDeclaration > Identifier',
@@ -57,18 +62,20 @@ export function resolveMembers(source: ts.SourceFile): Member[] {
   ];
 
   return selectors
+    .map(appendIdentifierToSelector)
     .flatMap((selector) =>
       query(source, selector).map((node) => ({ selector, node }))
     )
     .map(
       ({ selector, node }) =>
         ({
-          selector: removeIdentifierQuery(selector),
+          selector: removeIdentifierFromSelector(selector),
           node: node.parent,
           type: toMemberType(node.parent.kind)!,
-          decorators: resolveDecorators(node.parent),
-          props: resolveProps(node.parent),
-          deps: [],
+          decorators: getDecoratorsFromNode(node.parent),
+          props: getPropsFromNode(node.parent),
+          methods: getMethodsFromNode(node.parent),
+          deps: [], // cannot be resolved statically. will be resolved within a project view
           name: node.getText(),
           isAbstract: includes(node.parent, 'AbstractKeyword'),
           isExported: includes(node.parent, 'ExportKeyword'),

@@ -3,13 +3,13 @@ import { getEdges, includeMemberTypeOf, MemberType } from '../../lib';
 import {
   collectHotspots,
   collectLinesOfCode,
+  getProjectMembersAndStartFrom,
+  getProjectView,
   groupSums,
   HotspotOptions,
   LinesOfCodeOptions,
   logSharedOptions,
   output,
-  resolveProjectMembersFrom,
-  resolveProjectView,
   setupLogLevel,
   setupSharedOptions,
   SharedOptions,
@@ -56,8 +56,8 @@ export async function stats(options: StatsOptions) {
   setupLogLevel(options);
   logSharedOptions(options);
 
-  const graph = resolveProjectView(options);
-  const members = await resolveProjectMembersFrom(graph, options);
+  const graph = getProjectView(options);
+  const members = await getProjectMembersAndStartFrom(graph, options);
   const edges = getEdges(graph.members);
   const decoratedBy = members
     .flatMap((m) => m.decorators.map((d) => d.name))

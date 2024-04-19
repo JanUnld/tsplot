@@ -32,14 +32,22 @@ export function renderMemberAsPlantUML(m: Member): string {
     .filter(Boolean)
     .join(', ');
 
-  const str = `${type} ${m.name}${stereotype ? ` <<${stereotype}>>` : ''}`;
+  const props = m.props
+    .map((p) => `{field} ${p.name}${p.typeName ? `: ${p.typeName}` : ''}`)
+    .join(EOL);
+  const methods = m.methods
+    .map((m) => `{method} ${m.name}(${m.params.map((p) => p.name).join(', ')})`)
+    .join(EOL);
 
-  if (!m.props.length) {
-    return str;
-  } else {
-    const props = m.props.map((p) => `{field} ${p.name}`).join(EOL);
-    return `${str} {${EOL}${indent(props)}${EOL}}`;
-  }
+  let str = `${type} ${m.name}${stereotype ? ` <<${stereotype}>>` : ''}`;
+
+  if (props || methods) str += ` {${EOL}`;
+  if (props) str += `${indent(props)}${EOL}`;
+  // if (props && methods) str += `${indent('..')}${EOL}`;
+  if (methods) str += `${indent(methods)}${EOL}`;
+  if (props || methods) str += `}${EOL}`;
+
+  return str;
 }
 
 export class PlantUMLClassDiagram extends RelationDiagram {
@@ -50,7 +58,11 @@ export class PlantUMLClassDiagram extends RelationDiagram {
     if (!members?.length && !edges?.length) return '';
 
     return renderPlantUml(
-      members.map(renderMemberAsPlantUML).filter(Boolean).join(EOL),
+      members
+        .filter((m) => m.isExported)
+        .map(renderMemberAsPlantUML)
+        .filter(Boolean)
+        .join(EOL),
       edges.map(renderEdge).join(EOL)
     );
   }

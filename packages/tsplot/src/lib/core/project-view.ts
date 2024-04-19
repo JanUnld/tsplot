@@ -4,7 +4,7 @@ import { FilterSet, SourceFileFilterFn } from '../filter';
 import { dedupeBy } from '../utils';
 import { Dependency, DependencyOrigin } from './dependency';
 import { Member, MemberType } from './member';
-import { ProjectFile, toProjectFile } from './project-file';
+import { getProjectFileFromSourceFile, ProjectFile } from './project-file';
 
 function coerceMemberName(memberOrName: Member | string) {
   return typeof memberOrName === 'string' ? memberOrName : memberOrName.name;
@@ -27,11 +27,11 @@ export class ProjectView {
     readonly sources: ts.SourceFile[],
     filters?: SourceFileFilterFn[]
   ) {
-    this.#files = this.#resolveProjectFiles(filters);
+    this.#files = this.#getProjectFiles(filters);
     this.#members = this.files.flatMap((f) => f.members);
   }
 
-  async resolveDependencyMembers(member: Member, options?: { depth?: number }) {
+  async getDependencyMembers(member: Member, options?: { depth?: number }) {
     let depth = options?.depth;
 
     let deps = member.deps
@@ -43,7 +43,7 @@ export class ProjectView {
     if (depth != null) depth--;
 
     for (const m of deps) {
-      let members = (await this.resolveDependencyMembers(m, { depth })).filter(
+      let members = (await this.getDependencyMembers(m, { depth })).filter(
         (m2) => ![m.name, m2.name].includes(member.name)
       );
 
@@ -53,7 +53,7 @@ export class ProjectView {
     return deps.concat(member).filter(this.hasMember.bind(this));
   }
 
-  async resolveDependentMembers(member: Member, options?: { depth?: number }) {
+  async getDependentMembers(member: Member, options?: { depth?: number }) {
     let depth = options?.depth;
 
     let dependents = this.members
@@ -65,7 +65,7 @@ export class ProjectView {
     if (depth != null) depth--;
 
     for (const m of dependents) {
-      let members = (await this.resolveDependentMembers(m, { depth })).filter(
+      let members = (await this.getDependentMembers(m, { depth })).filter(
         (m2) => ![m.name, m2.name].includes(member.name)
       );
 
@@ -92,11 +92,11 @@ export class ProjectView {
     return this.members.some((m) => m.name === memberName);
   }
 
-  #resolveProjectFiles(filters?: SourceFileFilterFn[]): ProjectFile[] {
+  #getProjectFiles(filters?: SourceFileFilterFn[]): ProjectFile[] {
     const files = new FilterSet<ts.SourceFile>()
       .add(...(filters ?? []))
       .apply(this.sources)
-      .map(toProjectFile);
+      .map(getProjectFileFromSourceFile);
 
     this.#files = files;
     this.#members = files.flatMap((f) => f.members);
@@ -105,12 +105,12 @@ export class ProjectView {
       ...file,
       members: file.members.map((member) => ({
         ...member,
-        deps: this.#resolveDirectDeps(member),
+        deps: this.#getDirectDeps(member),
       })),
     }));
   }
 
-  #resolveDirectDeps(member: Member): Dependency[] {
+  #getDirectDeps(member: Member): Dependency[] {
     const toDep = (origin: DependencyOrigin, node: ts.Node) =>
       <Dependency>{
         origin,

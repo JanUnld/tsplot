@@ -8,7 +8,7 @@ export interface Comment {
 }
 
 /** @experimental */
-export function resolveLeadingComments(
+export function getLeadingCommentsFromNode(
   node: ts.Node,
   source: ts.SourceFile
 ): Comment[] {

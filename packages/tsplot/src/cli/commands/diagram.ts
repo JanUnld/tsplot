@@ -6,10 +6,10 @@ import {
   INTERPOLATION_REGEX,
 } from '../../lib/utils/interpolation';
 import {
+  getProjectMembersAndStartFrom,
+  getProjectView,
   logSharedOptions,
   output,
-  resolveProjectMembersFrom,
-  resolveProjectView,
   setupLogLevel,
   setupSharedOptions,
   SharedOptions,
@@ -80,17 +80,17 @@ export async function diagram(options: DiagramOptions) {
   setupLogLevel(options);
   logSharedOptions(options);
 
-  const projectView = resolveProjectView(options);
+  const projectView = getProjectView(options);
   const render = getDiagramRenderer(options);
 
   if (!options.split || !options?.from) {
-    const members = await resolveProjectMembersFrom(projectView, options);
+    const members = await getProjectMembersAndStartFrom(projectView, options);
 
     await output(render(members, options), options);
   } else {
     const memberBatch = await Promise.all(
       options.from.map((m) =>
-        resolveProjectMembersFrom(projectView, {
+        getProjectMembersAndStartFrom(projectView, {
           ...options,
           from: [m],
         })

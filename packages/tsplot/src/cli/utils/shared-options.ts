@@ -147,7 +147,7 @@ export function logSharedOptions(options: SharedOptions) {
 }
 
 /** @internal */
-export function resolveProjectView(options: SharedOptions): ProjectView {
+export function getProjectView(options: SharedOptions): ProjectView {
   const isRelevantSourceFile = (f: ts.SourceFile) => {
     return !f.isDeclarationFile && !f.fileName.includes('node_modules');
   };
@@ -202,7 +202,7 @@ export function resolveProjectView(options: SharedOptions): ProjectView {
 }
 
 /** @internal */
-export async function resolveProjectMembersFrom(
+export async function getProjectMembersAndStartFrom(
   projectView: ProjectView,
   options: SharedOptions
 ): Promise<Member[]> {
@@ -211,8 +211,8 @@ export async function resolveProjectMembersFrom(
     .filter(Boolean)
     .map((m) => {
       return !options?.reverse
-        ? projectView.resolveDependencyMembers(m!, options)
-        : projectView.resolveDependentMembers(m!, options);
+        ? projectView.getDependencyMembers(m!, options)
+        : projectView.getDependentMembers(m!, options);
     });
 
   return deferred ? (await Promise.all(deferred)).flat() : projectView.members;

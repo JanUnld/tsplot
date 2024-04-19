@@ -22,8 +22,8 @@ export async function collectHotspots(
   const memberDepsExpansion = await Promise.all(
     members.map((m) =>
       options?.reverse
-        ? projectView.resolveDependentMembers(m, { depth: 0 })
-        : projectView.resolveDependencyMembers(m, { depth: 0 })
+        ? projectView.getDependentMembers(m, { depth: 0 })
+        : projectView.getDependencyMembers(m, { depth: 0 })
     )
   );
   const memberDepSums = memberDepsExpansion

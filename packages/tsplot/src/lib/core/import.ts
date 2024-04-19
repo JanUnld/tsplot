@@ -7,7 +7,7 @@ export interface Import {
   src: string;
 }
 
-export function resolveImports(source: ts.SourceFile): Import[] {
+export function getImportsFromSourceFile(source: ts.SourceFile): Import[] {
   return query(
     source,
     'ImportDeclaration, CallExpression:has(ImportKeyword, Identifier[name="require"])'
