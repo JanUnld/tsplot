@@ -50,7 +50,7 @@ export function resolveMembers(source: ts.SourceFile): Member[] {
     'EnumDeclaration > Identifier',
     'FunctionDeclaration > Identifier',
     'TypeAliasDeclaration > Identifier',
-    'SourceFile > VariableStatement VariableDeclaration > Identifier',
+    'SourceFile > VariableStatement VariableDeclaration > Identifier:first-child',
   ];
 
   return selectors
