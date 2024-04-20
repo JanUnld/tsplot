@@ -45,7 +45,7 @@ export function renderMemberAsPlantUML(m: Member): string {
   if (props) str += `${indent(props)}${EOL}`;
   // if (props && methods) str += `${indent('..')}${EOL}`;
   if (methods) str += `${indent(methods)}${EOL}`;
-  if (props || methods) str += `}${EOL}`;
+  if (props || methods) str += `}`;
 
   return str;
 }
@@ -59,7 +59,7 @@ export class PlantUMLClassDiagram extends RelationDiagram {
 
     return renderPlantUml(
       members
-        .filter((m) => m.isExported)
+        // .filter((m) => m.isExported)
         .map(renderMemberAsPlantUML)
         .filter(Boolean)
         .join(EOL),
