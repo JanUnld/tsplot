@@ -1,13 +1,15 @@
-import { includes, query } from '@phenomnomnominal/tsquery';
 import * as ts from 'typescript';
 import {
-  appendIdentifierToSelector,
+  getModifierFlagsFromNode,
+  getNodesBySelectors,
   removeIdentifierFromSelector,
+  ResolvedNode,
 } from '../utils';
 import { Decorator, getDecoratorsFromNode } from './decorator';
 import { Dependency } from './dependency';
+import { Field, getFieldsFromNode } from './field';
 import { getMethodsFromNode, Method } from './method';
-import { getPropsFromNode, Property } from './property';
+import { getParamsFromNode, Parameter } from './parameter';
 
 export enum MemberType {
   Class = 'class',
@@ -38,17 +40,16 @@ export function toMemberType(kind: ts.SyntaxKind): MemberType | undefined {
   }
 }
 
-export interface Member {
-  selector: string;
-  node: ts.Node;
+export interface Member extends ResolvedNode {
   deps: Dependency[];
   decorators: Decorator[];
-  props: Property[];
+  props: Field[];
   methods: Method[];
+  params: Parameter[];
   type: MemberType;
   name: string;
-  isAbstract: boolean;
   isExported: boolean;
+  isAbstract: boolean;
 }
 
 export function getMembersFromSourceFile(source: ts.SourceFile): Member[] {
@@ -61,24 +62,20 @@ export function getMembersFromSourceFile(source: ts.SourceFile): Member[] {
     'SourceFile > VariableStatement VariableDeclaration > Identifier:first-child',
   ];
 
-  return selectors
-    .map(appendIdentifierToSelector)
-    .flatMap((selector) =>
-      query(source, selector).map((node) => ({ selector, node }))
-    )
-    .map(
-      ({ selector, node }) =>
-        ({
-          selector: removeIdentifierFromSelector(selector),
-          node: node.parent,
-          type: toMemberType(node.parent.kind)!,
-          decorators: getDecoratorsFromNode(node.parent),
-          props: getPropsFromNode(node.parent),
-          methods: getMethodsFromNode(node.parent),
-          deps: [], // cannot be resolved statically. will be resolved within a project view
-          name: node.getText(),
-          isAbstract: includes(node.parent, 'AbstractKeyword'),
-          isExported: includes(node.parent, 'ExportKeyword'),
-        } as Member)
-    );
+  return getNodesBySelectors(source, selectors).map(
+    ({ selector, node }) =>
+      ({
+        selector: removeIdentifierFromSelector(selector),
+        node: node.parent,
+        name: node.getText(),
+        type: toMemberType(node.parent.kind)!,
+        decorators: getDecoratorsFromNode(node.parent),
+        props: getFieldsFromNode(node.parent),
+        methods: getMethodsFromNode(node.parent),
+        params: getParamsFromNode(node.parent),
+        ...getModifierFlagsFromNode(node.parent, ['isExported', 'isAbstract']),
+        // cannot be resolved statically. will be resolved within a project view
+        deps: [] as Dependency[],
+      } as Member)
+  );
 }

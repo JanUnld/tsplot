@@ -93,8 +93,7 @@ export class ProjectView {
   }
 
   #getProjectFiles(filters?: SourceFileFilterFn[]): ProjectFile[] {
-    const files = new FilterSet<ts.SourceFile>()
-      .add(...(filters ?? []))
+    const files = FilterSet.with(filters ?? [])
       .apply(this.sources)
       .map(getProjectFileFromSourceFile);
 

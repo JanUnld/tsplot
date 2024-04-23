@@ -11,20 +11,13 @@ export interface ResolvedNode {
 }
 
 /** @internal */
-export function getNodesBySelectors(
-  node: ts.Node,
-  selectors: string[]
-): ResolvedNode[] {
-  return selectors.flatMap((selector) =>
-    query(node, selector).map((node) => ({ selector, node }))
-  );
-}
+type SelectorPipeOperator = (str: string) => string;
 
 /** @internal */
 export const pipeSelector = (
   selector: string,
-  operators: Array<(str: string) => string>
-) => operators.reduce((s, f) => f(s), selector);
+  operators?: SelectorPipeOperator[]
+) => operators?.reduce((s, f) => f(s), selector) ?? selector;
 
 /** @internal */
 export const appendIdentifierToSelector = (selector: string) =>
@@ -41,3 +34,16 @@ export const prependDeclToSelector = (selector: string) =>
 /** @internal */
 export const removeDeclFromSelector = (selector: string) =>
   selector.replace(/:declaration\s*>\s*/, '');
+
+/** @internal */
+export function getNodesBySelectors(
+  node: ts.Node,
+  selectors: string[],
+  operators?: Array<(str: string) => string>
+): ResolvedNode[] {
+  return selectors
+    .map((selector) => pipeSelector(selector, operators))
+    .flatMap((selector) =>
+      query(node, selector).map((node) => ({ selector, node }))
+    );
+}

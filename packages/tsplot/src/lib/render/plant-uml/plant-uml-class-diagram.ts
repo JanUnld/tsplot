@@ -1,7 +1,7 @@
 import { EOL } from 'os';
 import { Member } from '../../core';
-import { indent } from '../../utils';
-import { RelationDiagram } from '../relation-diagram';
+import { dedupeBy, indent } from '../../utils';
+import { RelationDiagram, RelationOptions } from '../relation-diagram';
 import { renderEdge } from '../render-edge';
 import { renderPlantUml } from './render-plant-uml';
 
@@ -32,11 +32,16 @@ export function renderMemberAsPlantUML(m: Member): string {
     .filter(Boolean)
     .join(', ');
 
-  const props = m.props
-    .map((p) => `{field} ${p.name}${p.typeName ? `: ${p.typeName}` : ''}`)
-    .join(EOL);
+  const props = m.props.map((p) => `{field} ${p.name}`).join(EOL);
   const methods = m.methods
-    .map((m) => `{method} ${m.name}(${m.params.map((p) => p.name).join(', ')})`)
+    .map(
+      (m) =>
+        `{method}${m.isStatic ? ' {static} ' : ''}${
+          m.isAbstract ? ' {abstract} ' : ''
+        }${m.name}(${m.params
+          .map((p) => `${p.isRest ? '...' : ''}${p.name}`)
+          .join(', ')})`
+    )
     .join(EOL);
 
   let str = `${type} ${m.name}${stereotype ? ` <<${stereotype}>>` : ''}`;
@@ -51,7 +56,7 @@ export function renderMemberAsPlantUML(m: Member): string {
 }
 
 export class PlantUMLClassDiagram extends RelationDiagram {
-  override render(options?: { edgeless?: boolean }) {
+  override render(options?: RelationOptions) {
     const members = this.getMembers(options);
     const edges = this.getEdges();
 
@@ -59,7 +64,7 @@ export class PlantUMLClassDiagram extends RelationDiagram {
 
     return renderPlantUml(
       members
-        // .filter((m) => m.isExported)
+        .filter(dedupeBy((m) => m.name))
         .map(renderMemberAsPlantUML)
         .filter(Boolean)
         .join(EOL),

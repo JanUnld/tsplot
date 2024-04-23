@@ -1,31 +1,23 @@
 import * as ts from 'typescript';
 import {
+  ACCESS_MODIFIER_FLAGS,
+  AccessModifiers,
   appendIdentifierToSelector,
   dedupeBy,
+  getModifierFlagsFromNode,
   getNodesBySelectors,
-  getTypeRefName,
   pipeSelector,
   prependDeclToSelector,
   removeDeclFromSelector,
   removeIdentifierFromSelector,
+  ResolvedNode,
 } from '../utils';
 
-export interface Property {
-  selector: string;
-  node: ts.Node;
+export interface Field extends ResolvedNode, AccessModifiers {
   name: string;
-  typeName?: string;
-  // typeName: string;
-  // isAbstract: boolean;
-  // isStatic: boolean;
-  // isReadonly: boolean;
-  // isOptional: boolean;
-  // isPrivate: boolean;
-  // isProtected: boolean;
-  // isPublic: boolean;
 }
 
-export function getPropsFromNode(node: ts.Node): Property[] {
+export function getFieldsFromNode(node: ts.Node): Field[] {
   const selectors: string[] = [
     'PropertySignature',
     'PropertyDeclaration:not(:has(ArrowFunction))',
@@ -34,15 +26,10 @@ export function getPropsFromNode(node: ts.Node): Property[] {
     'EnumMember',
   ];
 
-  return getNodesBySelectors(
-    node,
-    selectors.map((selector) =>
-      pipeSelector(selector, [
-        prependDeclToSelector,
-        appendIdentifierToSelector,
-      ])
-    )
-  )
+  return getNodesBySelectors(node, selectors, [
+    prependDeclToSelector,
+    appendIdentifierToSelector,
+  ])
     .map(({ selector, node }) => {
       return {
         selector: pipeSelector(selector, [
@@ -51,7 +38,7 @@ export function getPropsFromNode(node: ts.Node): Property[] {
         ]),
         node: node.parent,
         name: node.getText(),
-        typeName: getTypeRefName(node.parent),
+        ...getModifierFlagsFromNode(node.parent, ACCESS_MODIFIER_FLAGS),
       };
     })
     .filter(dedupeBy((p) => p.name));

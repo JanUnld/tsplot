@@ -1,36 +1,22 @@
-import { query } from '@phenomnomnominal/tsquery';
 import * as ts from 'typescript';
 import {
+  ACCESS_MODIFIER_FLAGS,
+  AccessModifiers,
   appendIdentifierToSelector,
   dedupeBy,
+  getModifierFlagsFromNode,
   getNodesBySelectors,
-  getTypeRefName,
   pipeSelector,
   prependDeclToSelector,
   removeDeclFromSelector,
   removeIdentifierFromSelector,
+  ResolvedNode,
 } from '../utils';
+import { getParamsFromNode, Parameter } from './parameter';
 
-export interface MethodParam {
-  node: ts.Node;
+export interface Method extends ResolvedNode, AccessModifiers {
   name: string;
-  typeName?: string;
-}
-
-export interface Method {
-  selector: string;
-  node: ts.Node;
-  name: string;
-  typeName?: string;
-  params: MethodParam[];
-  // returns: string;
-  // isAbstract: boolean;
-  // isStatic: boolean;
-  // isReadonly: boolean;
-  // isOptional: boolean;
-  // isPrivate: boolean;
-  // isProtected: boolean;
-  // isPublic: boolean;
+  params: Parameter[];
 }
 
 export function getMethodsFromNode(node: ts.Node): Method[] {
@@ -40,35 +26,20 @@ export function getMethodsFromNode(node: ts.Node): Method[] {
     'PropertyDeclaration:has(ArrowFunction)',
   ];
 
-  return getNodesBySelectors(
-    node,
-    selectors.map((selector) =>
-      pipeSelector(selector, [
-        prependDeclToSelector,
-        appendIdentifierToSelector,
-      ])
-    )
-  )
+  return getNodesBySelectors(node, selectors, [
+    prependDeclToSelector,
+    appendIdentifierToSelector,
+  ])
     .map(({ selector, node }) => {
       return {
         selector: pipeSelector(selector, [
           removeDeclFromSelector,
           removeIdentifierFromSelector,
         ]),
-        params: query(
-          node.parent,
-          pipeSelector('Parameter', [
-            prependDeclToSelector,
-            appendIdentifierToSelector,
-          ])
-        ).map((node) => ({
-          node: node.parent,
-          name: node.getText(),
-          typeName: getTypeRefName(node.parent),
-        })),
         node: node.parent,
         name: node.getText(),
-        typeName: getTypeRefName(node.parent),
+        params: getParamsFromNode(node.parent),
+        ...getModifierFlagsFromNode(node.parent, ACCESS_MODIFIER_FLAGS),
       };
     })
     .filter(dedupeBy((p) => p.name));

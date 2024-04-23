@@ -1,4 +1,5 @@
 import { DependencyOrigin, Member } from '../core';
+import { FilterSet } from '../filter';
 import { Diagram } from './diagram';
 
 export const enum RelationType {
@@ -42,19 +43,37 @@ export function getEdges(members: Member[]) {
     .filter((e) => e.from && e.to);
 }
 
+export interface RelationOptions {
+  /** Include {@link Member}s without any relation (edge) to other members */
+  edgeless?: boolean;
+  /**
+   * Include non-exported {@link Member}s
+   * @remarks "Exported" means that the member is accessible from outside the
+   *  module (file). **Not** the package in general
+   */
+  nonExported?: boolean;
+}
+
 export abstract class RelationDiagram extends Diagram {
-  override getMembers(options?: { edgeless?: boolean }): Member[] {
+  override getMembers(options?: RelationOptions): Member[] {
+    const filters = new FilterSet<Member>();
+
     const members = super.getMembers();
 
-    if (options?.edgeless !== false) return members;
+    if (!options?.nonExported) {
+      filters.add((m) => m.isExported);
+    }
+    if (options?.edgeless === false) {
+      const edges = this.getEdges().filter((e) => {
+        return members.includes(e.from) && members.includes(e.to);
+      });
 
-    const edges = this.getEdges().filter((e) => {
-      return members.includes(e.from) && members.includes(e.to);
-    });
+      filters.add((m) =>
+        edges.some((e) => e.from.name === m.name || e.to.name === m.name)
+      );
+    }
 
-    return members.filter((c) => {
-      return edges.some((e) => e.from.name === c.name || e.to.name === c.name);
-    });
+    return filters.apply(members);
   }
 
   getEdges(): RelationEdge[] {
