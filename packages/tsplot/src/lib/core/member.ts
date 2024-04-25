@@ -40,10 +40,12 @@ export function toMemberType(kind: ts.SyntaxKind): MemberType | undefined {
   }
 }
 
+// todo: consider different member interfaces for different member types (e.g. ClassMember, InterfaceMember, etc.)
+
 export interface Member extends ResolvedNode {
   deps: Dependency[];
   decorators: Decorator[];
-  props: Field[];
+  fields: Field[];
   methods: Method[];
   params: Parameter[];
   type: MemberType;
@@ -70,7 +72,7 @@ export function getMembersFromSourceFile(source: ts.SourceFile): Member[] {
         name: node.getText(),
         type: toMemberType(node.parent.kind)!,
         decorators: getDecoratorsFromNode(node.parent),
-        props: getFieldsFromNode(node.parent),
+        fields: getFieldsFromNode(node.parent),
         methods: getMethodsFromNode(node.parent),
         params: getParamsFromNode(node.parent),
         ...getModifierFlagsFromNode(node.parent, ['isExported', 'isAbstract']),

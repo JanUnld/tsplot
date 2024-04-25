@@ -6,13 +6,16 @@
 - [x] Generate a PlantUML diagram from the project graph
 - [x] Add (some) filtering options
 - [x] Implement a simple CLI prototype
-- [ ] Field and method support to member resolution
+- [x] Field and method support to member resolution
+- [ ] Type param support
+- [ ] Provide more definite node typings for all interfaces (e.g. `Decorator.node` → `ts.Decorator`)
 - [ ] Hotspot detection and visualization
-- [ ] Include inferred type information from a `ts.TypeChecker`
+- [ ] Use `ts.createProgram` and `ts.TypeChecker` to properly receive type information
+  - This will involve a bit of refactoring of the currently static analysis of the source files
 - [ ] Different diagram renderer
   - [x] PlantUML
   - [x] Mermaid
-  - [ ] Graphviz
+  - [ ] Graphviz!
   - [ ] D2
 - [ ] Different types of diagrams
   - [x] Class diagram

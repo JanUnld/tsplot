@@ -1,39 +1,26 @@
 import { EOL } from 'os';
-import { Member } from '../../core';
-import { indent } from '../../utils';
-import { RelationDiagram } from '../relation-diagram';
-import { renderEdge } from '../render-edge';
-
-export function renderMemberAsMermaid(m: Member): string {
-  let annotation = '';
-  switch (m.type) {
-    case 'class':
-      if (m.isAbstract) {
-        annotation = 'Abstract';
-      }
-      break;
-    case 'enum':
-      annotation = 'Enumeration';
-      break;
-    case 'interface':
-      annotation = 'Interface';
-      break;
-  }
-
-  return (
-    `class ${m.name}` + (annotation ? `${EOL}<<${annotation}>> ${m.name}` : '')
-  );
-}
+import { dedupeBy } from '../../utils';
+import {
+  RelationDiagram,
+  RelationDiagramFilterOptions,
+} from '../relation-diagram';
+import { renderEdge, renderMember, renderMermaid } from './mermaid-renderer';
 
 export class MermaidClassDiagram extends RelationDiagram {
-  override render(options?: { edgeless?: boolean }): string {
-    return (
-      `classDiagram${EOL}` +
-      indent(
-        this.getMembers(options).map(renderMemberAsMermaid).join(EOL) +
-          EOL +
-          this.getEdges().map(renderEdge).join(EOL)
-      )
+  override render(options?: RelationDiagramFilterOptions): string {
+    const members = this.getMembers(options);
+    const edges = this.getEdges();
+
+    if (!members?.length && !edges?.length) return '';
+
+    return renderMermaid(
+      'classDiagram',
+      members
+        .filter(dedupeBy((m) => m.name))
+        .map(renderMember)
+        .filter(Boolean)
+        .join(EOL),
+      edges.map(renderEdge).join(EOL)
     );
   }
 }

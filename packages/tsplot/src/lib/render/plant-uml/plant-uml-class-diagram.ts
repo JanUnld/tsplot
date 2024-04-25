@@ -1,62 +1,13 @@
 import { EOL } from 'os';
-import { Member } from '../../core';
-import { dedupeBy, indent } from '../../utils';
-import { RelationDiagram, RelationOptions } from '../relation-diagram';
-import { renderEdge } from '../render-edge';
-import { renderPlantUml } from './render-plant-uml';
-
-export function renderMemberAsPlantUML(m: Member): string {
-  let type: string;
-  switch (m.type) {
-    case 'class':
-    case 'interface':
-    case 'enum':
-      type = m.type;
-      if (m.isAbstract && type === 'class') {
-        type = `abstract ${type}`;
-      }
-      break;
-    case 'type':
-      type = 'interface';
-      break;
-    case 'function':
-      type = 'protocol';
-      break;
-    default:
-      type = 'entity';
-      break;
-  }
-
-  const stereotype = m.decorators
-    ?.map((d) => d.name)
-    .filter(Boolean)
-    .join(', ');
-
-  const props = m.props.map((p) => `{field} ${p.name}`).join(EOL);
-  const methods = m.methods
-    .map(
-      (m) =>
-        `{method}${m.isStatic ? ' {static} ' : ''}${
-          m.isAbstract ? ' {abstract} ' : ''
-        }${m.name}(${m.params
-          .map((p) => `${p.isRest ? '...' : ''}${p.name}`)
-          .join(', ')})`
-    )
-    .join(EOL);
-
-  let str = `${type} ${m.name}${stereotype ? ` <<${stereotype}>>` : ''}`;
-
-  if (props || methods) str += ` {${EOL}`;
-  if (props) str += `${indent(props)}${EOL}`;
-  // if (props && methods) str += `${indent('..')}${EOL}`;
-  if (methods) str += `${indent(methods)}${EOL}`;
-  if (props || methods) str += `}`;
-
-  return str;
-}
+import { dedupeBy } from '../../utils';
+import {
+  RelationDiagram,
+  RelationDiagramFilterOptions,
+} from '../relation-diagram';
+import { renderEdge, renderMember, renderPlantUml } from './plant-uml-renderer';
 
 export class PlantUMLClassDiagram extends RelationDiagram {
-  override render(options?: RelationOptions) {
+  override render(options?: RelationDiagramFilterOptions) {
     const members = this.getMembers(options);
     const edges = this.getEdges();
 
@@ -65,7 +16,7 @@ export class PlantUMLClassDiagram extends RelationDiagram {
     return renderPlantUml(
       members
         .filter(dedupeBy((m) => m.name))
-        .map(renderMemberAsPlantUML)
+        .map(renderMember)
         .filter(Boolean)
         .join(EOL),
       edges.map(renderEdge).join(EOL)

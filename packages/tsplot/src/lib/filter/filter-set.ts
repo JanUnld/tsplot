@@ -43,9 +43,14 @@ export class FilterSet<T> {
    * @remarks This operation is non-reversible
    */
   compose(options?: FilterComposeOptions): Predicate<T> {
-    const filters = Array.from(this.predicates);
+    const filters = this.decompose();
     const method = options?.method ?? 'every';
 
     return (it: T) => filters[method]((f) => f(it));
+  }
+
+  /** Decomposes the {@link FilterSet} instance into an array of {@link Predicate}s */
+  decompose(): Predicate<T>[] {
+    return Array.from(this.predicates);
   }
 }
