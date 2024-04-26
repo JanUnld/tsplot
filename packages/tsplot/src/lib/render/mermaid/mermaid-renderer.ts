@@ -2,9 +2,11 @@ import { EOL } from 'os';
 import { RelationDiagramOptions, RelationEdge } from 'tsplot';
 import { Field, Member, MemberType, Method, Parameter } from '../../core';
 import { AccessModifiers, indent } from '../../utils';
+import { joinAndNormalizeSpace } from '../../utils/space';
 import {
   renderEdgeConnection,
   renderNameQuoted,
+  renderOptional,
   renderVisibility,
 } from '../renderer';
 
@@ -15,7 +17,7 @@ function renderSuffixClassifiers(am: AccessModifiers): string {
   const abstractTag = am.isAbstract ? '*' : '';
   const staticTag = am.isStatic ? '$' : '';
 
-  return [abstractTag, staticTag].join('');
+  return joinAndNormalizeSpace([abstractTag, staticTag], { separator: '' });
 }
 
 /** @internal */
@@ -48,25 +50,27 @@ function renderMemberIdentifier(m: Member): string {
 /** @internal */
 function renderField(f: Field, member: Member) {
   const visibility = member.type !== MemberType.Enum ? renderVisibility(f) : '';
-  const field = [visibility, f.name, renderSuffixClassifiers(f)].join('');
+  const field = joinAndNormalizeSpace(
+    [visibility, f.name, renderOptional(f), renderSuffixClassifiers(f)],
+    { separator: '' }
+  );
   return `${renderMemberIdentifier(member)} ${field}`;
 }
 
 /** @internal */
 function renderMethod(m: Method, member: Member): string {
   const params = m.params.map(renderParameter).join(', ');
-  const method = [
-    renderVisibility(m),
-    `${m.name}(${params})`,
-    renderSuffixClassifiers(m),
-  ].join('');
+  const method = joinAndNormalizeSpace(
+    [renderVisibility(m), `${m.name}(${params})`, renderSuffixClassifiers(m)],
+    { separator: '' }
+  );
 
   return `${renderMemberIdentifier(member)} ${method}`;
 }
 
 /** @internal */
 function renderParameter(p: Parameter): string {
-  return `${p.isRest ? '...' : ''}${p.name}${p.isOptional ? '?' : ''}`;
+  return `${p.isRest ? '...' : ''}${p.name}${renderOptional(p)}`;
 }
 
 /** @internal */

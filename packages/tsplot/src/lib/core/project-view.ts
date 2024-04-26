@@ -11,24 +11,24 @@ function coerceMemberName(memberOrName: Member | string) {
 }
 
 export class ProjectView {
-  #files: ProjectFile[];
-  #members: Member[];
+  private _files: ProjectFile[];
+  private _members: Member[];
 
   readonly filters = new FilterSet<Member>();
 
   get files(): ProjectFile[] {
-    return this.#files;
+    return this._files;
   }
   get members(): Member[] {
-    return this.filters.apply(this.#members);
+    return this.filters.apply(this._members);
   }
 
   constructor(
     readonly sources: ts.SourceFile[],
     filters?: SourceFileFilterFn[]
   ) {
-    this.#files = this.#getProjectFiles(filters);
-    this.#members = this.files.flatMap((f) => f.members);
+    this._files = this._getProjectFiles(filters);
+    this._members = this.files.flatMap((f) => f.members);
   }
 
   async getDependencyMembers(member: Member, options?: { depth?: number }) {
@@ -92,24 +92,24 @@ export class ProjectView {
     return this.members.some((m) => m.name === memberName);
   }
 
-  #getProjectFiles(filters?: SourceFileFilterFn[]): ProjectFile[] {
+  private _getProjectFiles(filters?: SourceFileFilterFn[]): ProjectFile[] {
     const files = FilterSet.with(filters ?? [])
       .apply(this.sources)
       .map(getProjectFileFromSourceFile);
 
-    this.#files = files;
-    this.#members = files.flatMap((f) => f.members);
+    this._files = files;
+    this._members = files.flatMap((f) => f.members);
 
     return files.map((file) => ({
       ...file,
       members: file.members.map((member) => ({
         ...member,
-        deps: this.#getDirectDeps(member),
+        deps: this._getDirectDeps(member),
       })),
     }));
   }
 
-  #getDirectDeps(member: Member): Dependency[] {
+  private _getDirectDeps(member: Member): Dependency[] {
     const toDep = (origin: DependencyOrigin, node: ts.Node) =>
       <Dependency>{
         origin,

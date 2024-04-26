@@ -9,7 +9,8 @@ export type AccessModifierFlags =
   | 'isPrivate'
   | 'isProtected'
   | 'isPublic'
-  | 'isReadonly';
+  | 'isReadonly'
+  | 'isOptional';
 
 /** @internal */
 export type AccessModifiers = Record<AccessModifierFlags, boolean>;
@@ -29,7 +30,7 @@ const MODIFIER_TOKEN_BY_FLAG: Record<ModifierFlag, string> = {
   isProtected: 'ProtectedKeyword',
   isPublic: 'PublicKeyword',
   isReadonly: 'ReadonlyKeyword',
-  isOptional: 'QuestionToken',
+  isOptional: ':declaration QuestionToken',
   isRest: 'DotDotDotToken',
 };
 
@@ -77,6 +78,7 @@ export const ACCESS_MODIFIER_FLAGS: AccessModifierFlags[] = [
   'isProtected',
   'isPublic',
   'isReadonly',
+  'isOptional',
 ];
 
 /** @internal */

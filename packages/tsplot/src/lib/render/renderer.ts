@@ -15,6 +15,11 @@ export function renderVisibility(am: AccessModifiers): string {
   return '';
 }
 
+/** @internal */
+export function renderOptional(o: { isOptional?: boolean }) {
+  return o.isOptional ? '?' : '';
+}
+
 /**
  * Used to render the connection of two related {@link Member}s
  * @internal

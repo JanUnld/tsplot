@@ -15,12 +15,12 @@ export interface DiagramOptions {
 }
 
 export abstract class Diagram {
-  readonly #members: Member[];
+  private readonly _members: Member[];
 
   readonly filters = new FilterSet<Member>();
 
   constructor(members: Member[]) {
-    this.#members = members ?? [];
+    this._members = members ?? [];
   }
 
   getMembers(options?: DiagramOptions): Member[] {
@@ -30,7 +30,7 @@ export abstract class Diagram {
       filters.add((m) => m.isExported);
     }
 
-    return filters.apply(this.#members);
+    return filters.apply(this._members);
   }
 
   abstract render(): string;
