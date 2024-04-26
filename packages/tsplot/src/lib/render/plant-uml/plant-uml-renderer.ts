@@ -2,9 +2,11 @@ import { EOL } from 'os';
 import { RelationDiagramOptions, RelationEdge } from 'tsplot';
 import { Field, Member, MemberType, Method, Parameter } from '../../core';
 import { AccessModifiers, indent } from '../../utils';
+import { joinAndNormalizeSpace } from '../../utils/space';
 import {
   renderEdgeConnection,
   renderNameQuoted,
+  renderOptional,
   renderVisibility,
 } from '../renderer';
 
@@ -20,7 +22,7 @@ function renderAccessModifiers(
   const abstractTag = am.isAbstract ? '{abstract}' : '';
   const staticTag = am.isStatic ? '{static}' : '';
 
-  return [visibility, abstractTag, staticTag].join(' ').trim();
+  return joinAndNormalizeSpace([visibility, abstractTag, staticTag]);
 }
 
 /** @internal */
@@ -50,20 +52,26 @@ function getShapeTypeFromMember(m: Member): string {
 
 /** @internal */
 function renderField(f: Field, member: Member): string {
-  return `${renderAccessModifiers(f, member.type)} {field} ${f.name}`;
+  return joinAndNormalizeSpace([
+    renderAccessModifiers(f, member.type),
+    '{field}',
+    `${f.name}${renderOptional(f)}`,
+  ]);
 }
 
 /** @internal */
 function renderMethod(m: Method, member: Member): string {
   const params = m.params.map(renderParameter).join(', ');
-  return `${renderAccessModifiers(m, member.type)} {method} ${
-    m.name
-  }(${params})`;
+  return joinAndNormalizeSpace([
+    renderAccessModifiers(m, member.type),
+    '{method}',
+    `${m.name}(${params})`,
+  ]);
 }
 
 /** @internal */
 function renderParameter(p: Parameter): string {
-  return `${p.isRest ? '...' : ''}${p.name}${p.isOptional ? '?' : ''}`;
+  return `${p.isRest ? '...' : ''}${p.name}${renderOptional(p)}`;
 }
 
 /** @internal */
