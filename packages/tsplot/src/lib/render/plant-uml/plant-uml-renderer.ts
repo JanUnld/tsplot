@@ -1,5 +1,5 @@
 import { EOL } from 'os';
-import { RelationEdge } from 'tsplot';
+import { RelationDiagramOptions, RelationEdge } from 'tsplot';
 import { Field, Member, MemberType, Method, Parameter } from '../../core';
 import { AccessModifiers, indent } from '../../utils';
 import {
@@ -7,6 +7,9 @@ import {
   renderNameQuoted,
   renderVisibility,
 } from '../renderer';
+
+/** @internal */
+export interface PlantUMLRenderOptions extends RelationDiagramOptions {}
 
 /** @internal */
 function renderAccessModifiers(
@@ -64,7 +67,10 @@ function renderParameter(p: Parameter): string {
 }
 
 /** @internal */
-export function renderMember(m: Member): string {
+export function renderMember(
+  m: Member,
+  options?: PlantUMLRenderOptions
+): string {
   const shapeType = getShapeTypeFromMember(m);
   const stereotype = m.decorators
     ?.map((d) => d.name)
@@ -76,11 +82,14 @@ export function renderMember(m: Member): string {
 
   let str = `${shapeType} ${name}${stereotype ? ` <<${stereotype}>>` : ''}`;
 
-  const hasFieldsOrMethodsOrParams = [m.fields, m.methods, m.params].some(
-    (it) => it?.length
-  );
+  const shouldRenderFields = !!m.fields?.length && options?.fields !== false;
+  const shouldRenderMethods = !!m.methods?.length && options?.methods !== false;
+  const shouldRenderParams = !!m.params?.length;
 
-  if (hasFieldsOrMethodsOrParams) {
+  const shouldRenderBlock =
+    shouldRenderFields || shouldRenderMethods || shouldRenderParams;
+
+  if (shouldRenderBlock) {
     // render a block opening whenever we have fields, methods, or params
     str += ` {${EOL}`;
   }
@@ -88,19 +97,25 @@ export function renderMember(m: Member): string {
   if (isFunction) {
     const params = m.params.map(renderParameter).join(EOL);
 
-    if (params) {
+    if (shouldRenderParams) {
       str += indent('..Parameters..') + EOL;
       str += indent(params) + EOL;
     }
   } else {
-    const fields = m.fields.map((f) => renderField(f, m)).join(EOL);
-    const methods = m.methods.map((m2) => renderMethod(m2, m)).join(EOL);
+    if (shouldRenderFields) {
+      const fields = m.fields.map((f) => renderField(f, m)).join(EOL);
 
-    if (fields) str += indent(fields) + EOL;
-    if (methods) str += indent(methods) + EOL;
+      str += indent(fields) + EOL;
+    }
+
+    if (shouldRenderMethods) {
+      const methods = m.methods.map((m2) => renderMethod(m2, m)).join(EOL);
+
+      str += indent(methods) + EOL;
+    }
   }
 
-  if (hasFieldsOrMethodsOrParams) {
+  if (shouldRenderBlock) {
     // also close the block that we opened earlier
     str += `}`;
   }

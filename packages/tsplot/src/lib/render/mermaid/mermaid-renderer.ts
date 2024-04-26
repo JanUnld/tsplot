@@ -1,5 +1,5 @@
 import { EOL } from 'os';
-import { RelationEdge } from 'tsplot';
+import { RelationDiagramOptions, RelationEdge } from 'tsplot';
 import { Field, Member, MemberType, Method, Parameter } from '../../core';
 import { AccessModifiers, indent } from '../../utils';
 import {
@@ -7,6 +7,8 @@ import {
   renderNameQuoted,
   renderVisibility,
 } from '../renderer';
+
+export interface MermaidRenderOptions extends RelationDiagramOptions {}
 
 /** @internal */
 function renderSuffixClassifiers(am: AccessModifiers): string {
@@ -68,14 +70,29 @@ function renderParameter(p: Parameter): string {
 }
 
 /** @internal */
-export function renderMember(m: Member): string {
+export function renderMember(
+  m: Member,
+  options?: MermaidRenderOptions
+): string {
   const annotation = renderAnnotation(m);
-  const contents = [
+
+  let contents = [
     `class ${m.name}[${renderNameQuoted(m)}]`,
     annotation ? `${annotation} ${m.name}` : '',
-    m.fields.map((f) => renderField(f, m)).join(EOL),
-    m.methods.map((m2) => renderMethod(m2, m)).join(EOL),
   ];
+
+  const shouldRenderFields = !!m.fields?.length && options?.fields !== false;
+  const shouldRenderMethods = !!m.methods?.length && options?.methods !== false;
+
+  if (shouldRenderFields) {
+    contents = [...contents, m.fields.map((f) => renderField(f, m)).join(EOL)];
+  }
+  if (shouldRenderMethods) {
+    contents = [
+      ...contents,
+      m.methods.map((m2) => renderMethod(m2, m)).join(EOL),
+    ];
+  }
 
   return contents.filter((str) => !!str).join(EOL);
 }

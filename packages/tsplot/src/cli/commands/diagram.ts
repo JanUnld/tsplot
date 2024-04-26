@@ -20,6 +20,8 @@ export type BuiltInRenderer = 'plant-uml' | 'mermaid';
 export interface DiagramOptions extends SharedOptions {
   edgeless?: boolean;
   renderer?: BuiltInRenderer;
+  fields?: boolean;
+  methods?: boolean;
   // type: string; // Diagram type
 }
 
@@ -32,9 +34,21 @@ export function setupDiagramCommand() {
       )
       .option(
         '-e, --edgeless',
-        'indicated whether nodes without any edges shall be rendered or not',
+        'indicates whether nodes without any edges shall be rendered or not',
         false
       )
+      .option(
+        '--fields',
+        'indicates whether fields shall be included in the diagram or not',
+        true
+      )
+      .option('--no-fields', "don't include fields in the diagram")
+      .option(
+        '--methods',
+        'indicates whether methods shall be included in the diagram or not',
+        true
+      )
+      .option('--no-methods', "don't include methods in the diagram")
       .addOption(
         new Option(
           '-r, --renderer <name>',

@@ -1,6 +1,6 @@
 import { DependencyOrigin, Member } from '../core';
 import { FilterSet } from '../filter';
-import { Diagram, DiagramFilterOptions } from './diagram';
+import { Diagram, DiagramOptions } from './diagram';
 
 export const enum RelationType {
   Aggregation = 'aggregation',
@@ -43,13 +43,13 @@ export function getEdges(members: Member[]) {
     .filter((e) => e.from && e.to);
 }
 
-export interface RelationDiagramFilterOptions extends DiagramFilterOptions {
+export interface RelationDiagramOptions extends DiagramOptions {
   /** Include {@link Member}s without any relation (edge) to other members */
   edgeless?: boolean;
 }
 
 export abstract class RelationDiagram extends Diagram {
-  override getMembers(options?: RelationDiagramFilterOptions): Member[] {
+  override getMembers(options?: RelationDiagramOptions): Member[] {
     const filters = new FilterSet<Member>();
 
     const members = super.getMembers(options);
@@ -67,7 +67,7 @@ export abstract class RelationDiagram extends Diagram {
     return filters.apply(members);
   }
 
-  getEdges(options?: DiagramFilterOptions): RelationEdge[] {
+  getEdges(options?: DiagramOptions): RelationEdge[] {
     return getEdges(super.getMembers(options));
   }
 }

@@ -1,13 +1,15 @@
 import { EOL } from 'os';
 import { dedupeBy } from '../../utils';
+import { RelationDiagram } from '../relation-diagram';
 import {
-  RelationDiagram,
-  RelationDiagramFilterOptions,
-} from '../relation-diagram';
-import { renderEdge, renderMember, renderMermaid } from './mermaid-renderer';
+  MermaidRenderOptions,
+  renderEdge,
+  renderMember,
+  renderMermaid,
+} from './mermaid-renderer';
 
 export class MermaidClassDiagram extends RelationDiagram {
-  override render(options?: RelationDiagramFilterOptions): string {
+  override render(options?: MermaidRenderOptions): string {
     const members = this.getMembers(options);
     const edges = this.getEdges();
 
@@ -17,7 +19,8 @@ export class MermaidClassDiagram extends RelationDiagram {
       'classDiagram',
       members
         .filter(dedupeBy((m) => m.name))
-        .map(renderMember)
+
+        .map((m) => renderMember(m, options))
         .filter(Boolean)
         .join(EOL),
       edges.map(renderEdge).join(EOL)
