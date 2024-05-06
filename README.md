@@ -14,6 +14,10 @@ and their members.
 npx tsplot --help
 ```
 
+> [!NOTE]  
+> Make sure to take a look at the `--help` output of the subcommands as well, to get
+> a full overview of the available options.
+
 ```
 Usage: tsplot [options] [command]
 
@@ -33,7 +37,40 @@ These are examples showcasing a class diagram for this project.
 > [!NOTE]  
 > The diagrams might be outdated
 
+### Plant UML
+
+The shell command below...
+
+```shell
+npx tsplot diagram --project './tsconfig.json' \
+  --exclude '**/cli/**' \
+  --excludeTypes 'function' \
+  --excludeTypes 'variable' \
+  --excludeTypes 'type' \
+  --output './tsplot.puml' \
+  --edgeless
+```
+
+...generates the following Plant UML diagram:
+
+![tsplot](./tsplot.svg)
+
 ### Mermaid
+
+The shell command below...
+
+```shell
+npx tsplot diagram --project './tsconfig.json' \
+  --exclude '**/cli/**' \
+  --excludeTypes 'function' \
+  --excludeTypes 'variable' \
+  --excludeTypes 'type' \
+  --output './tsplot.mmd' \
+  --renderer 'mermaid' \
+  --edgeless
+```
+
+...generates the following Mermaid diagram:
 
 ```mermaid
 classDiagram
@@ -190,7 +227,3 @@ classDiagram
   RelationDiagram--|>MermaidClassDiagram
   RelationDiagramFilterOptions..>MermaidClassDiagram
 ```
-
-### Plant UML
-
-![tsplot](./tsplot.svg)

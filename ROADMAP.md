@@ -25,6 +25,7 @@
   - [ ] _State diagram?_
   - [ ] _Sequence diagram?_
 - [ ] Add documentation
+  - more usage examples
 - [ ] Add configuration file support
 - [x] Publish to NPM
 - [ ] Code cleanup
