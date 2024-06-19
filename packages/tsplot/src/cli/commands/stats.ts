@@ -1,24 +1,11 @@
 import { program } from 'commander';
-import { getEdges, includeMemberTypeOf, MemberType } from '../../lib';
 import {
-  collectHotspots,
-  collectLinesOfCode,
-  getProjectMembersAndStartFrom,
-  getProjectView,
-  groupSums,
-  HotspotOptions,
-  LinesOfCodeOptions,
   logSharedOptions,
   output,
-  setupLogLevel,
+  setupConsola,
   setupSharedOptions,
-  SharedOptions,
 } from '../utils';
-
-export interface StatsOptions
-  extends SharedOptions,
-    HotspotOptions,
-    LinesOfCodeOptions {}
+import { collectStats, StatsOptions } from '../utils/stats';
 
 export function setupStatsCommand() {
   setupSharedOptions(
@@ -53,43 +40,10 @@ export function setupStatsCommand() {
 }
 
 export async function stats(options: StatsOptions) {
-  setupLogLevel(options);
+  setupConsola(options);
   logSharedOptions(options);
 
-  const graph = getProjectView(options);
-  const members = await getProjectMembersAndStartFrom(graph, options);
-  const edges = getEdges(graph.members);
-  const decoratedBy = members
-    .flatMap((m) => m.decorators.map((d) => d.name))
-    .reduce(groupSums, {});
-
-  let stats: Record<string, unknown> = {
-    files: graph.files.length,
-    members: members.length,
-    edges: edges.length,
-    classes: members.filter(includeMemberTypeOf(MemberType.Class)).length,
-    interfaces: members.filter(includeMemberTypeOf(MemberType.Interface))
-      .length,
-    enums: members.filter(includeMemberTypeOf(MemberType.Enum)).length,
-    types: members.filter(includeMemberTypeOf(MemberType.Type)).length,
-    functions: members.filter(includeMemberTypeOf(MemberType.Function)).length,
-    variables: members.filter(includeMemberTypeOf(MemberType.Variable)).length,
-  };
-
-  if (Object.keys(decoratedBy).length) stats = { ...stats, decoratedBy };
-
-  if (options?.hotspots) {
-    const hotspots = await collectHotspots(graph, options, members);
-
-    if (Object.keys(hotspots).length) stats = { ...stats, hotspots };
-  }
-
-  if (options?.linesOfCode) {
-    const linesOfCode = await collectLinesOfCode(graph.files, options);
-
-    stats = { ...stats, linesOfCode };
-  }
-
+  const stats = await collectStats(options);
   const str = JSON.stringify(stats, null, 2);
 
   await output(str, options);
