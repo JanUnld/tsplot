@@ -126,13 +126,24 @@ export function setupSharedOptions(command: Command) {
   );
 }
 
-/** @internal */
-export function setupLogLevel(options: SharedOptions) {
+/**
+ * @internal
+ * @returns A function that restores the original log level and options of consola
+ */
+export function setupConsola(options: SharedOptions) {
+  const { level: consolaLogLevel, options: consolaOptions } = consola;
+  const restoreFn = () => {
+    consola.options = consolaOptions;
+    consola.level = consolaLogLevel;
+  };
+
   consola.options.formatOptions.date = false;
   consola.options.formatOptions.compact = true;
 
   if (options.debug) consola.level = 4;
   if (options.silent) consola.level = -999;
+
+  return restoreFn;
 }
 
 /** @internal */
