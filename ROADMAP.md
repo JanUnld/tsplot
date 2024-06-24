@@ -11,7 +11,7 @@
 - [ ] Add namespacing support
 - [ ] Type param support
 - [ ] Provide more definite node typings for all interfaces (e.g. `Decorator.node` → `ts.Decorator`)
-- [ ] Namespace grouping
+- [ ] Namespace grouping — _see [concept](./docs/concepts/NAMESPACE_GROUPING.md)_
   - [ ] Use path mappings
   - [ ] Use module (file) boundaries
   - [ ] Define custom namespaces by folder
