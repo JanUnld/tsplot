@@ -10,6 +10,10 @@
 - [ ] Add namespacing support
 - [ ] Type param support
 - [ ] Provide more definite node typings for all interfaces (e.g. `Decorator.node` → `ts.Decorator`)
+- [ ] Namespace grouping
+  - [ ] Use path mappings
+  - [ ] Use module (file) boundaries
+  - [ ] Define custom namespaces by folder
 - [ ] Hotspot detection and visualization
 - [ ] Use `ts.createProgram` and `ts.TypeChecker` to properly receive type information
   - This will involve a bit of refactoring of the currently static analysis of the source files
