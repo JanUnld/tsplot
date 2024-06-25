@@ -1,4 +1,3 @@
-import { project } from '@phenomnomnominal/tsquery';
 import { Command, Option, program } from 'commander';
 import { consola } from 'consola';
 import { outputFile } from 'fs-extra';
@@ -6,20 +5,20 @@ import { EOL } from 'os';
 import { resolve } from 'path';
 import * as process from 'process';
 import * as ts from 'typescript';
-import { Member, MemberType, ProjectView } from '../../lib/core';
+import { Member, MemberKind, ProjectView } from '../../lib/core';
 import {
   excludeDecoratedBy,
+  excludeMemberKindOf,
   excludeMemberNamespace,
-  excludeMemberTypeOf,
   excludeSourceFiles,
   includeDecoratedBy,
+  includeMemberKindOf,
   includeMemberNamespace,
-  includeMemberTypeOf,
   includeSourceFiles,
 } from '../../lib/filter';
 
 /** @internal */
-const MEMBER_TYPES: MemberType[] = Object.values(MemberType);
+const MEMBER_TYPES: MemberKind[] = Object.values(MemberKind);
 
 /** @internal */
 const DEFAULT_DEPTH = 9999;
@@ -163,12 +162,15 @@ export function getProjectView(options: SharedOptions): ProjectView {
     return !f.isDeclarationFile && !f.fileName.includes('node_modules');
   };
 
-  const sourceFiles = project(getTsConfigPath(options));
-  const projectView = new ProjectView(sourceFiles, [
-    isRelevantSourceFile,
-    includeSourceFiles(...(options.include ?? [])),
-    excludeSourceFiles(...(options.exclude ?? [])),
-  ]);
+  const tsConfigPath = getTsConfigPath(options);
+  const projectView = new ProjectView({
+    tsConfigPath,
+    filters: [
+      isRelevantSourceFile,
+      includeSourceFiles(...(options.include ?? [])),
+      excludeSourceFiles(...(options.exclude ?? [])),
+    ],
+  });
 
   const isPartialView = [
     options.from,
@@ -201,8 +203,8 @@ export function getProjectView(options: SharedOptions): ProjectView {
     );
 
   projectView.filters.add(
-    includeMemberTypeOf(...((options.includeTypes ?? []) as MemberType[])),
-    excludeMemberTypeOf(...((options.excludeTypes ?? []) as MemberType[])),
+    includeMemberKindOf(...((options.includeTypes ?? []) as MemberKind[])),
+    excludeMemberKindOf(...((options.excludeTypes ?? []) as MemberKind[])),
     includeDecoratedBy(...(options.includeDecoratedBy ?? [])),
     excludeDecoratedBy(...(options.excludeDecoratedBy ?? [])),
     includeMemberNamespace(...(options.includeNames ?? [])),

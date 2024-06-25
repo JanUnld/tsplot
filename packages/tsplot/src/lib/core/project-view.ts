@@ -1,10 +1,9 @@
 import { query } from '@phenomnomnominal/tsquery';
 import * as ts from 'typescript';
 import { FilterSet, SourceFileFilterFn } from '../filter';
-import { dedupeBy } from '../utils';
-import { getParsedTsConfig } from '../utils/tsconfig';
+import { dedupeBy, getParsedTsConfig } from '../utils';
 import { Dependency, DependencyOrigin } from './dependency';
-import { Member, MemberType } from './member';
+import { Member, MemberKind } from './member';
 import { getProjectFileFromSourceFile, ProjectFile } from './project-file';
 
 function coerceMemberName(memberOrName: Member | string) {
@@ -85,8 +84,8 @@ export class ProjectView {
     return dependents.concat(member).filter(this.hasMember.bind(this));
   }
 
-  getMembersOfType(type: MemberType) {
-    return this.members.filter((m) => m.type === type);
+  getMembersOfKind(kind: MemberKind) {
+    return this.members.filter((m) => m.kind === kind);
   }
 
   getMemberByName(name: string) {
@@ -115,7 +114,7 @@ export class ProjectView {
   private _getProjectFiles(filters?: SourceFileFilterFn[]): ProjectFile[] {
     const files = FilterSet.with(filters ?? [])
       .apply(this._program.getSourceFiles() as ts.SourceFile[])
-      .map(getProjectFileFromSourceFile);
+      .map((s) => getProjectFileFromSourceFile(s, this._typeChecker));
 
     this._files = files;
     this._members = files.flatMap((f) => f.members);

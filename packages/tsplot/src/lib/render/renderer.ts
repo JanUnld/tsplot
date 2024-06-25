@@ -1,10 +1,11 @@
-import { Member, MemberType } from '../core';
+import * as ts from 'typescript';
+import { Member } from '../core';
 import { AccessModifiers } from '../utils';
 import { RelationEdge } from './relation-diagram';
 
 /** @internal */
 export function renderNameQuoted(m: Member): string {
-  return `"${m.name + (m.type === MemberType.Function ? '()' : '')}"`;
+  return `"${m.name + (ts.isFunctionLike(m.node) ? '()' : '')}"`;
 }
 
 /** @internal */
@@ -37,7 +38,7 @@ export function renderEdgeConnection(edge: RelationEdge): string {
       connection = '--o';
       break;
     default:
-      connection = edge.from.type === MemberType.Class ? '-->' : '..>';
+      connection = ts.isClassLike(edge.from.node) ? '-->' : '..>';
       break;
   }
 
