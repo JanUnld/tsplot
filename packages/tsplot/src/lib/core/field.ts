@@ -6,18 +6,23 @@ import {
   dedupeBy,
   getModifierFlagsFromNode,
   getNodesBySelectors,
+  getTypeInfoFromNode,
   pipeSelector,
   prependDeclToSelector,
   removeDeclFromSelector,
   removeIdentifierFromSelector,
   ResolvedNode,
+  TypeInfo,
 } from '../utils';
 
-export interface Field extends ResolvedNode, AccessModifiers {
+export interface Field extends ResolvedNode, AccessModifiers, TypeInfo {
   name: string;
 }
 
-export function getFieldsFromNode(node: ts.Node): Field[] {
+export function getFieldsFromNode(
+  node: ts.Node,
+  typeChecker: ts.TypeChecker
+): Field[] {
   const selectors: string[] = [
     'PropertySignature',
     'PropertyDeclaration:not(:has(ArrowFunction))',
@@ -38,6 +43,7 @@ export function getFieldsFromNode(node: ts.Node): Field[] {
         ]),
         node: node.parent,
         name: node.getText(),
+        ...getTypeInfoFromNode(node.parent, typeChecker),
         ...getModifierFlagsFromNode(node.parent, ACCESS_MODIFIER_FLAGS),
       };
     })

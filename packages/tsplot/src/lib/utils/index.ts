@@ -4,3 +4,6 @@ export * from './dedupe';
 export * from './indent';
 export * from './match';
 export * from './selector';
+export * from './space';
+export * from './tsconfig';
+export * from './type-info';

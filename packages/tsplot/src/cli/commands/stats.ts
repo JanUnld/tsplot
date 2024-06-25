@@ -1,4 +1,5 @@
 import { program } from 'commander';
+import { getEdges, includeMemberKindOf, MemberKind } from '../../lib';
 import {
   logSharedOptions,
   output,

@@ -6,20 +6,31 @@ import {
   dedupeBy,
   getModifierFlagsFromNode,
   getNodesBySelectors,
+  getReturnTypeInfoFromNode,
+  getTypeInfoFromNode,
   pipeSelector,
   prependDeclToSelector,
   removeDeclFromSelector,
   removeIdentifierFromSelector,
   ResolvedNode,
+  ReturnTypeInfo,
+  TypeInfo,
 } from '../utils';
 import { getParamsFromNode, Parameter } from './parameter';
 
-export interface Method extends ResolvedNode, AccessModifiers {
+export interface Method
+  extends ResolvedNode,
+    AccessModifiers,
+    TypeInfo,
+    ReturnTypeInfo {
   name: string;
   params: Parameter[];
 }
 
-export function getMethodsFromNode(node: ts.Node): Method[] {
+export function getMethodsFromNode(
+  node: ts.Node,
+  typeChecker: ts.TypeChecker
+): Method[] {
   const selectors: string[] = [
     'MethodSignature',
     'MethodDeclaration',
@@ -38,8 +49,10 @@ export function getMethodsFromNode(node: ts.Node): Method[] {
         ]),
         node: node.parent,
         name: node.getText(),
-        params: getParamsFromNode(node.parent),
+        params: getParamsFromNode(node.parent, typeChecker),
         ...getModifierFlagsFromNode(node.parent, ACCESS_MODIFIER_FLAGS),
+        ...getTypeInfoFromNode(node.parent, typeChecker),
+        ...getReturnTypeInfoFromNode(node.parent, typeChecker),
       };
     })
     .filter(dedupeBy((p) => p.name));

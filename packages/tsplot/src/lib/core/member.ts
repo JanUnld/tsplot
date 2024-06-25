@@ -2,8 +2,12 @@ import * as ts from 'typescript';
 import {
   getModifierFlagsFromNode,
   getNodesBySelectors,
+  getTypeInfoFromNode,
   removeIdentifierFromSelector,
   ResolvedNode,
+  ReturnTypeInfo,
+  tryGetReturnTypeFromNode,
+  TypeInfo,
 } from '../utils';
 import { Decorator, getDecoratorsFromNode } from './decorator';
 import { Dependency } from './dependency';
@@ -11,7 +15,7 @@ import { Field, getFieldsFromNode } from './field';
 import { getMethodsFromNode, Method } from './method';
 import { getParamsFromNode, Parameter } from './parameter';
 
-export enum MemberType {
+export enum MemberKind {
   Class = 'class',
   Interface = 'interface',
   Enum = 'enum',
@@ -20,21 +24,24 @@ export enum MemberType {
   Variable = 'variable',
 }
 
-export function toMemberType(kind: ts.SyntaxKind): MemberType | undefined {
+/** @internal */
+export function getMemberKindFromSyntaxKind(
+  kind: ts.SyntaxKind
+): MemberKind | undefined {
   switch (kind) {
     case ts.SyntaxKind.ClassDeclaration:
-      return MemberType.Class;
+      return MemberKind.Class;
     case ts.SyntaxKind.InterfaceDeclaration:
-      return MemberType.Interface;
+      return MemberKind.Interface;
     case ts.SyntaxKind.EnumDeclaration:
-      return MemberType.Enum;
+      return MemberKind.Enum;
     case ts.SyntaxKind.FunctionDeclaration:
-      return MemberType.Function;
+      return MemberKind.Function;
     case ts.SyntaxKind.TypeAliasDeclaration:
-      return MemberType.Type;
+      return MemberKind.Type;
     case ts.SyntaxKind.VariableStatement:
     case ts.SyntaxKind.VariableDeclaration:
-      return MemberType.Variable;
+      return MemberKind.Variable;
     default:
       return undefined;
   }
@@ -42,19 +49,25 @@ export function toMemberType(kind: ts.SyntaxKind): MemberType | undefined {
 
 // todo: consider different member interfaces for different member types (e.g. ClassMember, InterfaceMember, etc.)
 
-export interface Member extends ResolvedNode {
+export interface Member
+  extends ResolvedNode,
+    TypeInfo,
+    Partial<ReturnTypeInfo> {
   deps: Dependency[];
   decorators: Decorator[];
   fields: Field[];
   methods: Method[];
   params: Parameter[];
-  type: MemberType;
+  kind: MemberKind;
   name: string;
   isExported: boolean;
   isAbstract: boolean;
 }
 
-export function getMembersFromSourceFile(source: ts.SourceFile): Member[] {
+export function getMembersFromSourceFile(
+  source: ts.SourceFile,
+  typeChecker: ts.TypeChecker
+): Member[] {
   const selectors: string[] = [
     'ClassDeclaration > Identifier',
     'InterfaceDeclaration > Identifier',
@@ -70,13 +83,16 @@ export function getMembersFromSourceFile(source: ts.SourceFile): Member[] {
         selector: removeIdentifierFromSelector(selector),
         node: node.parent,
         name: node.getText(),
-        type: toMemberType(node.parent.kind)!,
+        kind: getMemberKindFromSyntaxKind(node.parent.kind)!,
         decorators: getDecoratorsFromNode(node.parent),
-        fields: getFieldsFromNode(node.parent),
-        methods: getMethodsFromNode(node.parent),
-        params: getParamsFromNode(node.parent),
+        fields: getFieldsFromNode(node.parent, typeChecker),
+        methods: getMethodsFromNode(node.parent, typeChecker),
+        params: getParamsFromNode(node.parent, typeChecker),
         ...getModifierFlagsFromNode(node.parent, ['isExported', 'isAbstract']),
+        ...getTypeInfoFromNode(node.parent, typeChecker),
+        ...tryGetReturnTypeFromNode(node.parent, typeChecker),
         // cannot be resolved statically. will be resolved within a project view
+        // after all members are collected and indexed
         deps: [] as Dependency[],
       } as Member)
   );
