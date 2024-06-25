@@ -10,9 +10,10 @@ export interface ProjectFile {
 
 /** @internal */
 export function getProjectFileFromSourceFile(
-  source: ts.SourceFile
+  source: ts.SourceFile,
+  typeChecker: ts.TypeChecker
 ): ProjectFile {
-  const members = getMembersFromSourceFile(source);
+  const members = getMembersFromSourceFile(source, typeChecker);
   const imports = getImportsFromSourceFile(source);
   return { source, members, imports };
 }

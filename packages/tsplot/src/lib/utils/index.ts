@@ -5,3 +5,6 @@ export * from './indent';
 export * from './interpolation';
 export * from './match';
 export * from './selector';
+export * from './space';
+export * from './tsconfig';
+export * from './type-info';

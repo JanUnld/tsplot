@@ -1,6 +1,7 @@
 import { EOL } from 'os';
 import { RelationDiagramOptions, RelationEdge } from 'tsplot';
-import { Field, Member, MemberType, Method, Parameter } from '../../core';
+import * as ts from 'typescript';
+import { Field, Member, MemberKind, Method, Parameter } from '../../core';
 import { AccessModifiers, indent } from '../../utils';
 import { joinAndNormalizeSpace } from '../../utils/space';
 import {
@@ -16,9 +17,9 @@ export interface PlantUMLRenderOptions extends RelationDiagramOptions {}
 /** @internal */
 function renderAccessModifiers(
   am: AccessModifiers,
-  memberType: MemberType
+  memberType: MemberKind
 ): string {
-  const visibility = memberType !== MemberType.Enum ? renderVisibility(am) : '';
+  const visibility = memberType !== MemberKind.Enum ? renderVisibility(am) : '';
   const abstractTag = am.isAbstract ? '{abstract}' : '';
   const staticTag = am.isStatic ? '{static}' : '';
 
@@ -28,11 +29,11 @@ function renderAccessModifiers(
 /** @internal */
 function getShapeTypeFromMember(m: Member): string {
   let type: string;
-  switch (m.type) {
+  switch (m.kind) {
     case 'class':
     case 'interface':
     case 'enum':
-      type = m.type;
+      type = m.kind;
       if (m.isAbstract && type === 'class') {
         type = `abstract ${type}`;
       }
@@ -52,10 +53,13 @@ function getShapeTypeFromMember(m: Member): string {
 
 /** @internal */
 function renderField(f: Field, member: Member): string {
+  let typeStr = f.typeToString({ removeUndefined: f.isOptional });
+  if (typeStr) typeStr = `: ${typeStr}`;
+
   return joinAndNormalizeSpace([
-    renderAccessModifiers(f, member.type),
+    renderAccessModifiers(f, member.kind),
     '{field}',
-    `${f.name}${renderOptional(f)}`,
+    `${f.name}${renderOptional(f)}${typeStr}`,
   ]);
 }
 
@@ -63,15 +67,17 @@ function renderField(f: Field, member: Member): string {
 function renderMethod(m: Method, member: Member): string {
   const params = m.params.map(renderParameter).join(', ');
   return joinAndNormalizeSpace([
-    renderAccessModifiers(m, member.type),
+    renderAccessModifiers(m, member.kind),
     '{method}',
-    `${m.name}(${params})`,
+    `${m.name}(${params}): ${m.returnTypeToString()}`,
   ]);
 }
 
 /** @internal */
 function renderParameter(p: Parameter): string {
-  return `${p.isRest ? '...' : ''}${p.name}${renderOptional(p)}`;
+  const dotDotDot = p.isRest ? '...' : '';
+  const type = p.typeToString({ removeUndefined: p.isOptional });
+  return `${dotDotDot}${p.name}${renderOptional(p)}: ${type}`;
 }
 
 /** @internal */
@@ -85,7 +91,7 @@ export function renderMember(
     .filter(Boolean)
     .join(', ');
 
-  const isFunction = m.type === MemberType.Function;
+  const isFunction = ts.isFunctionLike(m.node);
   const name = renderNameQuoted(m);
 
   let str = `${shapeType} ${name}${stereotype ? ` <<${stereotype}>>` : ''}`;

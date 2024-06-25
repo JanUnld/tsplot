@@ -11,9 +11,11 @@
 - [ ] Type param support
 - [ ] Provide more definite node typings for all interfaces (e.g. `Decorator.node` → `ts.Decorator`)
 - [ ] Hotspot detection and visualization
-- [ ] Use `ts.createProgram` and `ts.TypeChecker` to properly receive type information
+- [x] Use `ts.createProgram` and `ts.TypeChecker` to properly receive type information
   - This will involve a bit of refactoring of the currently static analysis of the source files
   - More extensive and accurate type information resolution (advanced types, alias types, etc.)
+- [ ] Integrate a lightweight template engine to allow for more flexible diagram generation
+  - [ ] Add support for custom templates and variables
 - [ ] Different diagram renderer
   - [x] PlantUML
   - [x] Mermaid
