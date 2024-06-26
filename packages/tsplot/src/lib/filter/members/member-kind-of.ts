@@ -8,3 +8,8 @@ export function includeMemberKindOf(...kinds: MemberKind[]): MemberFilterFn {
 export function excludeMemberKindOf(...kinds: MemberKind[]): MemberFilterFn {
   return (m) => !kinds?.length || !includeMemberKindOf(...kinds)(m);
 }
+
+/** @deprecated Use {@link includeMemberKindOf} instead. Will be removed soon */
+export const includeMemberTypeOf = includeMemberKindOf;
+/** @deprecated Use {@link excludeMemberKindOf} instead. Will be removed soon */
+export const excludeMemberTypeOf = excludeMemberKindOf;
