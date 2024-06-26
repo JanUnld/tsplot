@@ -24,6 +24,9 @@ export enum MemberKind {
   Variable = 'variable',
 }
 
+/** @deprecated Use {@link MemberKind} instead. Will be removed soon */
+export const MemberType = MemberKind;
+
 /** @internal */
 export function getMemberKindFromSyntaxKind(
   kind: ts.SyntaxKind
