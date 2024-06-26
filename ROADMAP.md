@@ -7,6 +7,7 @@
 - [x] Add (some) filtering options
 - [x] Implement a simple CLI prototype
 - [x] Field and method support to member resolution
+- [ ] Add filtering support for fields and methods (e.g. by visibility modifiers)
 - [ ] Add namespacing support
 - [ ] Type param support
 - [ ] Provide more definite node typings for all interfaces (e.g. `Decorator.node` → `ts.Decorator`)
