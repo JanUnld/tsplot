@@ -76,27 +76,35 @@ npx tsplot diagram --project './tsconfig.json' \
 classDiagram
   class Import["Import"]
   <<interface>> Import
-  Import : +node
-  Import : +identifiers
-  Import : +src
+  Import : +ts.ImportDeclaration node
+  Import : +string[] identifiers
+  Import : +string src
   class Comment["Comment"]
   <<interface>> Comment
-  Comment : +text
-  Comment : +start
-  Comment : +end
+  Comment : +string text
+  Comment : +number start
+  Comment : +number end
   class ResolvedNode["ResolvedNode"]
   <<interface>> ResolvedNode
-  ResolvedNode : +selector
-  ResolvedNode : +node
+  ResolvedNode : +string selector
+  ResolvedNode : +ts.Node node
+  class TypeInfo["TypeInfo"]
+  <<interface>> TypeInfo
+  TypeInfo : +ts.Type type
+  TypeInfo : +TypeInfoFormatFn typeToString
+  class ReturnTypeInfo["ReturnTypeInfo"]
+  <<interface>> ReturnTypeInfo
+  ReturnTypeInfo : +ts.Type returnType
+  ReturnTypeInfo : +TypeInfoFormatFn returnTypeToString
   class Decorator["Decorator"]
   <<interface>> Decorator
-  Decorator : +node
-  Decorator : +name
+  Decorator : +ts.Decorator node
+  Decorator : +string name
   class Dependency["Dependency"]
   <<interface>> Dependency
-  Dependency : +origin
-  Dependency : +node
-  Dependency : +name
+  Dependency : +DependencyOrigin origin
+  Dependency : +ts.Node node
+  Dependency : +string name
   class DependencyOrigin["DependencyOrigin"]
   <<enumeration>> DependencyOrigin
   DependencyOrigin : Declaration
@@ -105,125 +113,152 @@ classDiagram
   DependencyOrigin : Heritage
   class Field["Field"]
   <<interface>> Field
-  Field : +name
+  Field : +string name
   class Parameter["Parameter"]
   <<interface>> Parameter
-  Parameter : +node
-  Parameter : +name
+  Parameter : +ts.Node node
+  Parameter : +string name
   class Method["Method"]
   <<interface>> Method
-  Method : +name
-  Method : +params
+  Method : +string name
+  Method : +Parameter[] params
   class Member["Member"]
   <<interface>> Member
-  Member : +deps
-  Member : +decorators
-  Member : +fields
-  Member : +methods
-  Member : +params
-  Member : +type
-  Member : +name
-  Member : +isExported
-  Member : +isAbstract
-  class MemberType["MemberType"]
-  <<enumeration>> MemberType
-  MemberType : Class
-  MemberType : Interface
-  MemberType : Enum
-  MemberType : Function
-  MemberType : Type
-  MemberType : Variable
+  Member : +Dependency[] deps
+  Member : +Decorator[] decorators
+  Member : +Field[] fields
+  Member : +Method[] methods
+  Member : +Parameter[] params
+  Member : +MemberKind kind
+  Member : +string name
+  Member : +boolean isExported
+  Member : +boolean isAbstract
+  class MemberKind["MemberKind"]
+  <<enumeration>> MemberKind
+  MemberKind : Class
+  MemberKind : Interface
+  MemberKind : Enum
+  MemberKind : Function
+  MemberKind : Type
+  MemberKind : Variable
   class ProjectFile["ProjectFile"]
   <<interface>> ProjectFile
-  ProjectFile : +source
-  ProjectFile : +imports
-  ProjectFile : +members
+  ProjectFile : +ts.SourceFile source
+  ProjectFile : +Import[] imports
+  ProjectFile : +Member[] members
   class FilterSet["FilterSet"]
-  FilterSet : #predicates
-  FilterSet : +with(filters)$
-  FilterSet : +add(...filter)
-  FilterSet : +remove(...filter)
-  FilterSet : +apply(target, options?)
-  FilterSet : +compose(options?)
-  FilterSet : +decompose()
+  FilterSet : #Set<Predicate<T>> predicates
+  FilterSet : +FilterSet<T> with(Predicate<T>[] filters)$
+  FilterSet : +this add(Predicate<T>[] ...filter)
+  FilterSet : +this remove(Predicate<T>[] ...filter)
+  FilterSet : +T[] apply(T[] target, options?)
+  FilterSet : +Predicate<T> compose(options?)
+  FilterSet : +Predicate<T>[] decompose()
   class FilterComposeOptions["FilterComposeOptions"]
   <<interface>> FilterComposeOptions
-  FilterComposeOptions : +method
-  class ProjectView["ProjectView"]
-  ProjectView : +filters
-  ProjectView : +files
-  ProjectView : +members
-  ProjectView : +getDependencyMembers(member, options?)
-  ProjectView : +getDependentMembers(member, options?)
-  ProjectView : +getMembersOfType(type)
-  ProjectView : +getMemberByName(name)
-  ProjectView : +getFileOfMember(member)
-  ProjectView : +hasMember(memberOrName)
-  class Diagram["Diagram"]
-  <<abstract>> Diagram
-  Diagram : +filters
-  Diagram : +getMembers(options?)
-  Diagram : +render()*
-  class DiagramFilterOptions["DiagramFilterOptions"]
-  <<interface>> DiagramFilterOptions
-  DiagramFilterOptions : +nonExported
-  class RelationDiagram["RelationDiagram"]
-  <<abstract>> RelationDiagram
-  RelationDiagram : +getMembers(options?)
-  RelationDiagram : +getEdges(options?)
-  class RelationEdge["RelationEdge"]
-  <<interface>> RelationEdge
-  RelationEdge : +type
-  RelationEdge : +from
-  RelationEdge : +to
-  class RelationDiagramFilterOptions["RelationDiagramFilterOptions"]
-  <<interface>> RelationDiagramFilterOptions
-  RelationDiagramFilterOptions : +edgeless
-  class RelationType["RelationType"]
-  <<enumeration>> RelationType
-  RelationType : Aggregation
-  RelationType : Association
-  RelationType : Composition
-  RelationType : Extension
-  class PlantUMLClassDiagram["PlantUMLClassDiagram"]
-  PlantUMLClassDiagram : +render(options?)
-  class MermaidClassDiagram["MermaidClassDiagram"]
-  MermaidClassDiagram : +render(options?)
-  DependencyOrigin..>Dependency
-  ResolvedNode--|>Field
-  ResolvedNode--|>Method
-  Parameter..>Method
-  ResolvedNode--|>Member
-  Dependency..>Member
-  Decorator..>Member
-  Field..>Member
-  Method..>Member
-  Parameter..>Member
-  MemberType..>Member
-  Import..>ProjectFile
-  Member..>ProjectFile
-  FilterComposeOptions..>FilterSet
-  ProjectFile..>ProjectView
-  Member..>ProjectView
-  FilterSet-->ProjectView
-  MemberType..>ProjectView
-  Dependency..>ProjectView
-  Member..>Diagram
-  FilterSet-->Diagram
-  DiagramFilterOptions..>Diagram
-  Member..>DiagramFilterOptions
-  Diagram--|>RelationDiagram
-  RelationDiagramFilterOptions..>RelationDiagram
-  Member..>RelationDiagram
-  FilterSet-->RelationDiagram
-  DiagramFilterOptions..>RelationDiagram
-  RelationEdge..>RelationDiagram
-  RelationType..>RelationEdge
-  Member..>RelationEdge
-  DiagramFilterOptions--|>RelationDiagramFilterOptions
-  Member..>RelationDiagramFilterOptions
-  RelationDiagram--|>PlantUMLClassDiagram
-  RelationDiagramFilterOptions..>PlantUMLClassDiagram
-  RelationDiagram--|>MermaidClassDiagram
-  RelationDiagramFilterOptions..>MermaidClassDiagram
+  FilterComposeOptions : +"every" | "some" method
+class ProjectView["ProjectView"]
+ProjectView : -ts.Program _program
+ProjectView : -ts.TypeChecker _typeChecker
+ProjectView : -ProjectFile[] _files
+ProjectView : -Member[] _members
+ProjectView : +FilterSet<Member> filters
+ProjectView : +ProjectFile[] files
+ProjectView : +Member[] members
+ProjectView : +Promise<Member[]> getDependencyMembers(Member member, options?)
+ProjectView : +Promise<Member[]> getDependentMembers(Member member, options?)
+ProjectView : +Member[] getMembersOfKind(kind)
+ProjectView : +Member | undefined getMemberByName(string name)
+ProjectView : +ProjectFile | undefined getFileOfMember(Member member)
+ProjectView : +boolean hasMember(memberOrName)
+ProjectView : +Member[] | undefined getExportedMembersOfFile(ProjectFile file)
+ProjectView : -ProjectFile[] _getProjectFiles(filters?)
+ProjectView : -Dependency[] _getDirectDeps(Member member)
+class ProjectViewOptions["ProjectViewOptions"]
+<<interface>> ProjectViewOptions
+ProjectViewOptions : +string tsConfigPath
+ProjectViewOptions : +SourceFileFilterFn[] filters?
+class Diagram["Diagram"]
+<<abstract>> Diagram
+Diagram : -Member[] _members
+Diagram : +FilterSet<Member> filters
+Diagram : +Member[] getMembers(options?)
+Diagram : +string render()*
+class DiagramOptions["DiagramOptions"]
+<<interface>> DiagramOptions
+DiagramOptions : +boolean nonExported?
+DiagramOptions : +boolean fields?
+DiagramOptions : +boolean methods?
+class RelationDiagram["RelationDiagram"]
+<<abstract>> RelationDiagram
+RelationDiagram : +Member[] getMembers(options?)
+RelationDiagram : +RelationEdge[] getEdges(options?)
+class RelationEdge["RelationEdge"]
+<<interface>> RelationEdge
+RelationEdge : +RelationType type
+RelationEdge : +Member from
+RelationEdge : +Member to
+class RelationDiagramOptions["RelationDiagramOptions"]
+<<interface>> RelationDiagramOptions
+RelationDiagramOptions : +boolean edgeless?
+class RelationType["RelationType"]
+<<enumeration>> RelationType
+RelationType : Aggregation
+RelationType : Association
+RelationType : Composition
+RelationType : Extension
+class PlantUMLRenderOptions["PlantUMLRenderOptions"]
+<<interface>> PlantUMLRenderOptions
+class PlantUMLClassDiagram["PlantUMLClassDiagram"]
+PlantUMLClassDiagram : +string render(options?)
+class MermaidRenderOptions["MermaidRenderOptions"]
+<<interface>> MermaidRenderOptions
+class MermaidClassDiagram["MermaidClassDiagram"]
+MermaidClassDiagram : +string render(options?)
+DependencyOrigin..>Dependency
+ResolvedNode--|>Field
+TypeInfo--|>Field
+TypeInfo--|>Parameter
+ResolvedNode--|>Method
+TypeInfo--|>Method
+ReturnTypeInfo--|>Method
+Parameter..>Method
+ResolvedNode--|>Member
+TypeInfo--|>Member
+ReturnTypeInfo--|>Member
+Dependency..>Member
+Decorator..>Member
+Field..>Member
+Method..>Member
+Parameter..>Member
+MemberKind..>Member
+Import..>ProjectFile
+Member..>ProjectFile
+FilterComposeOptions..>FilterSet
+ProjectViewOptions..>ProjectView
+ProjectFile..>ProjectView
+Member..>ProjectView
+FilterSet-->ProjectView
+MemberKind..>ProjectView
+Dependency..>ProjectView
+Member..>Diagram
+FilterSet-->Diagram
+DiagramOptions..>Diagram
+Member..>DiagramOptions
+Diagram--|>RelationDiagram
+RelationDiagramOptions..>RelationDiagram
+Member..>RelationDiagram
+FilterSet-->RelationDiagram
+DiagramOptions..>RelationDiagram
+RelationEdge..>RelationDiagram
+RelationType..>RelationEdge
+Member..>RelationEdge
+DiagramOptions--|>RelationDiagramOptions
+Member..>RelationDiagramOptions
+RelationDiagramOptions--|>PlantUMLRenderOptions
+RelationDiagram--|>PlantUMLClassDiagram
+PlantUMLRenderOptions..>PlantUMLClassDiagram
+RelationDiagramOptions--|>MermaidRenderOptions
+RelationDiagram--|>MermaidClassDiagram
+MermaidRenderOptions..>MermaidClassDiagram
 ```
