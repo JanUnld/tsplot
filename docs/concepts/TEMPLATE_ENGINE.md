@@ -42,5 +42,4 @@ Here's an example of a simple Nunjucks template that renders a PlantUML class di
   {{ edge.from.name }}->{{ edge.to.name }}
 {% endfor %}
 {% endblock %}
-@enduml
 ```
