@@ -1,0 +1,17 @@
+{% if edge.type == 'association' %}
+  {% block association %}
+    {% include 'puml/edge/association.njk' %}
+  {% endblock %}
+{% elseif edge.type == 'composition' %}
+  {% block composition %}
+    {% include 'puml/edge/composition.njk' %}
+  {% endblock %}
+{% elseif edge.type == 'aggregation' %}
+  {% block aggregation %}
+    {% include 'puml/edge/aggregation.njk' %}
+  {% endblock %}
+{% else %}
+  {% block default %}
+    {% include 'puml/edge/default.njk' %}
+  {% endblock %}
+{% endif %}
