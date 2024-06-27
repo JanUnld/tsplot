@@ -1,0 +1,3 @@
+{% macro edge(edge, connection = '--') %}
+{{ edge.from.name }}{{ connection }}{{ edge.to.name }}
+{% endmacro %}

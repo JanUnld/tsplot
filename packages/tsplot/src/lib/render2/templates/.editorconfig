@@ -1,0 +1,7 @@
+# This editor configuration file exclusively used for templates
+
+[*.njk]
+insert_final_newline = false
+
+[{macros.njk,*.macro.njk}]
+indent_size = 0

@@ -1,0 +1,5 @@
+{% if ts.isClassLike(edge.from.node) %}
+  {% block classLike %}{{ puml.edge(edge, '-->') }}{% endblock %}
+{% else %}
+  {% block default %}{{ puml.edge(edge, '..>') }}{% endblock %}
+{% endif %}

@@ -1,0 +1,14 @@
+{% extends 'puml/base.njk' %}
+
+{% block content %}
+  {% for member in members %}
+    {% block member %}
+      {% include 'puml/member.njk' %}
+    {% endblock %}
+  {% endfor %}
+  {% for edge in edges %}
+    {% block edge %}
+      {% include 'puml/edge.njk' %}
+    {% endblock %}
+  {% endfor %}
+{% endblock %}
