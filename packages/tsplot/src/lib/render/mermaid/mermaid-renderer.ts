@@ -1,8 +1,8 @@
 import { EOL } from 'os';
 import { RelationDiagramOptions, RelationEdge } from 'tsplot';
-import { Field, Member, MemberType, Method, Parameter } from '../../core';
-import { AccessModifiers, indent } from '../../utils';
-import { joinAndNormalizeSpace } from '../../utils/space';
+import * as ts from 'typescript';
+import { Field, Member, Method, Parameter } from '../../core';
+import { AccessModifiers, indent, joinAndNormalizeSpace } from '../../utils';
 import {
   renderEdgeConnection,
   renderNameQuoted,
@@ -23,7 +23,7 @@ function renderSuffixClassifiers(am: AccessModifiers): string {
 /** @internal */
 function renderAnnotation(m: Member): string {
   let annotation = '';
-  switch (m.type) {
+  switch (m.kind) {
     // case ?:
     //   annotation = 'service';
     //   break;
@@ -49,9 +49,17 @@ function renderMemberIdentifier(m: Member): string {
 
 /** @internal */
 function renderField(f: Field, member: Member) {
-  const visibility = member.type !== MemberType.Enum ? renderVisibility(f) : '';
+  const isEnum = ts.isEnumDeclaration(member.node);
+  const visibility = !isEnum ? renderVisibility(f) : '';
+  const type = !isEnum ? f.typeToString({ removeUndefined: f.isOptional }) : '';
+  // example: +field.type field.name*
   const field = joinAndNormalizeSpace(
-    [visibility, f.name, renderOptional(f), renderSuffixClassifiers(f)],
+    [
+      visibility,
+      `${type} ${f.name}`,
+      renderOptional(f),
+      renderSuffixClassifiers(f),
+    ],
     { separator: '' }
   );
   return `${renderMemberIdentifier(member)} ${field}`;
@@ -61,7 +69,11 @@ function renderField(f: Field, member: Member) {
 function renderMethod(m: Method, member: Member): string {
   const params = m.params.map(renderParameter).join(', ');
   const method = joinAndNormalizeSpace(
-    [renderVisibility(m), `${m.name}(${params})`, renderSuffixClassifiers(m)],
+    [
+      renderVisibility(m),
+      `${m.returnTypeToString()} ${m.name}(${params})`,
+      renderSuffixClassifiers(m),
+    ],
     { separator: '' }
   );
 
@@ -70,7 +82,17 @@ function renderMethod(m: Method, member: Member): string {
 
 /** @internal */
 function renderParameter(p: Parameter): string {
-  return `${p.isRest ? '...' : ''}${p.name}${renderOptional(p)}`;
+  return joinAndNormalizeSpace(
+    [
+      !p.type.isUnionOrIntersection()
+        ? p.typeToString({ removeUndefined: p.isOptional }) + ' '
+        : '',
+      p.isRest ? '...' : '',
+      p.name,
+      renderOptional(p),
+    ],
+    { separator: '' }
+  );
 }
 
 /** @internal */
@@ -94,7 +116,7 @@ export function renderMember(
   if (shouldRenderMethods) {
     contents = [
       ...contents,
-      m.methods.map((m2) => renderMethod(m2, m)).join(EOL),
+      m.methods.map((method) => renderMethod(method, m)).join(EOL),
     ];
   }
 

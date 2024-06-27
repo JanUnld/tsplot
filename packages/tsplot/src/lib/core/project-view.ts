@@ -3,14 +3,20 @@ import * as ts from 'typescript';
 import { FilterSet, SourceFileFilterFn } from '../filter';
 import { dedupeBy } from '../utils';
 import { Dependency, DependencyOrigin } from './dependency';
-import { Member, MemberType } from './member';
+import { Member, MemberKind } from './member';
 import { getProjectFileFromSourceFile, ProjectFile } from './project-file';
+import {
+  getProgramFromProjectViewOptions,
+  ProjectViewOptions,
+} from './project-view-options';
 
 function coerceMemberName(memberOrName: Member | string) {
   return typeof memberOrName === 'string' ? memberOrName : memberOrName.name;
 }
 
 export class ProjectView {
+  private readonly _typeChecker: ts.TypeChecker;
+  private _program: ts.Program;
   private _files: ProjectFile[];
   private _members: Member[];
 
@@ -23,11 +29,11 @@ export class ProjectView {
     return this.filters.apply(this._members);
   }
 
-  constructor(
-    readonly sources: ts.SourceFile[],
-    filters?: SourceFileFilterFn[]
-  ) {
-    this._files = this._getProjectFiles(filters);
+  constructor(options: ProjectViewOptions) {
+    this._program = getProgramFromProjectViewOptions(options);
+    this._typeChecker = this._program.getTypeChecker();
+
+    this._files = this._getProjectFiles(options.filters);
     this._members = this.files.flatMap((f) => f.members);
   }
 
@@ -75,8 +81,8 @@ export class ProjectView {
     return dependents.concat(member).filter(this.hasMember.bind(this));
   }
 
-  getMembersOfType(type: MemberType) {
-    return this.members.filter((m) => m.type === type);
+  getMembersOfKind(kind: MemberKind) {
+    return this.members.filter((m) => m.kind === kind);
   }
 
   getMemberByName(name: string) {
@@ -92,10 +98,20 @@ export class ProjectView {
     return this.members.some((m) => m.name === memberName);
   }
 
+  getExportedMembersOfFile(file: ProjectFile) {
+    const fileSymbol = this._typeChecker.getSymbolAtLocation(file.source);
+    if (!fileSymbol) return;
+
+    return this._typeChecker
+      .getExportsOfModule(fileSymbol)
+      .map((s) => this.getMemberByName(s.name))
+      .filter(Boolean) as Member[];
+  }
+
   private _getProjectFiles(filters?: SourceFileFilterFn[]): ProjectFile[] {
     const files = FilterSet.with(filters ?? [])
-      .apply(this.sources)
-      .map(getProjectFileFromSourceFile);
+      .apply(this._program.getSourceFiles() as ts.SourceFile[])
+      .map((s) => getProjectFileFromSourceFile(s, this._typeChecker));
 
     this._files = files;
     this._members = files.flatMap((f) => f.members);
