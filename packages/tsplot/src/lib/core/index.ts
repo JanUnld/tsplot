@@ -1,4 +1,5 @@
 export { ProjectFile } from './project-file';
+export * from './project-view-options';
 export * from './project-view';
 export * from './dependency';
 export * from './decorator';
