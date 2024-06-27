@@ -1,23 +1,22 @@
 import { query } from '@phenomnomnominal/tsquery';
 import * as ts from 'typescript';
 import { FilterSet, SourceFileFilterFn } from '../filter';
-import { dedupeBy, getParsedTsConfig } from '../utils';
+import { dedupeBy } from '../utils';
 import { Dependency, DependencyOrigin } from './dependency';
 import { Member, MemberKind } from './member';
 import { getProjectFileFromSourceFile, ProjectFile } from './project-file';
+import {
+  getProgramFromProjectViewOptions,
+  ProjectViewOptions,
+} from './project-view-options';
 
 function coerceMemberName(memberOrName: Member | string) {
   return typeof memberOrName === 'string' ? memberOrName : memberOrName.name;
 }
 
-export interface ProjectViewOptions {
-  tsConfigPath: string;
-  filters?: SourceFileFilterFn[];
-}
-
 export class ProjectView {
+  private readonly _typeChecker: ts.TypeChecker;
   private _program: ts.Program;
-  private _typeChecker: ts.TypeChecker;
   private _files: ProjectFile[];
   private _members: Member[];
 
@@ -31,9 +30,7 @@ export class ProjectView {
   }
 
   constructor(options: ProjectViewOptions) {
-    const tsConfig = getParsedTsConfig(options.tsConfigPath);
-
-    this._program = ts.createProgram(tsConfig.fileNames, tsConfig.options);
+    this._program = getProgramFromProjectViewOptions(options);
     this._typeChecker = this._program.getTypeChecker();
 
     this._files = this._getProjectFiles(options.filters);
