@@ -1,8 +1,8 @@
 import { EOL } from 'os';
-import { RelationDiagramOptions, RelationEdge } from 'tsplot';
 import * as ts from 'typescript';
 import { Field, Member, Method, Parameter } from '../../core';
 import { AccessModifiers, indent, joinAndNormalizeSpace } from '../../utils';
+import { RelationDiagramOptions, RelationEdge } from '../relation-diagram';
 import {
   renderEdgeConnection,
   renderNameQuoted,

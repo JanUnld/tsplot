@@ -10,10 +10,6 @@ export interface FilterComposeOptions {
 }
 
 export class FilterSet<T> {
-  static with<T>(filters: Predicate<T>[]) {
-    return new FilterSet(filters);
-  }
-
   protected readonly predicates = new Set<Predicate<T>>();
 
   constructor(filters?: Predicate<T>[]) {
@@ -53,4 +49,18 @@ export class FilterSet<T> {
   decompose(): Predicate<T>[] {
     return Array.from(this.predicates);
   }
+
+  // <editor-fold desc="Static">
+
+  static with<T>(filter: Predicate<T>[]) {
+    return new FilterSet(filter);
+  }
+
+  static merge<T>(...filter: (FilterSet<T> | Predicate<T>[])[]) {
+    return filter.reduce<FilterSet<T>>((result, f) => {
+      return result.add(...(f instanceof FilterSet ? f.decompose() : f));
+    }, new FilterSet<T>());
+  }
+
+  // </editor-fold>
 }

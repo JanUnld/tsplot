@@ -1,13 +1,17 @@
 import * as njk from 'nunjucks';
 import { resolve } from 'path';
 import * as ts from 'typescript';
+import {
+  TemplateContext,
+  TemplateFileRenderer,
+} from './template-file-renderer';
 
 /** @internal */
-const INTERNAL_TEMPLATE_DIR = resolve(__dirname, 'templates');
+const INTERNAL_NJK_TEMPLATE_DIR = resolve(__dirname, 'templates');
 
-export interface NjkRendererOptions extends njk.ConfigureOptions {
-  /** Base paths for the renderer to find any template files */
-  paths: string[];
+export interface NunjucksRendererOptions extends njk.ConfigureOptions {
+  /** Base directory paths for the renderer to find any template files */
+  rootDirs?: string[];
 }
 
 /**
@@ -16,11 +20,13 @@ export interface NjkRendererOptions extends njk.ConfigureOptions {
  * accept custom templates that will override any base templates defined inside
  * this library
  */
-export class NjkRenderer {
+export class NunjucksRenderer implements TemplateFileRenderer {
   private readonly _njk: njk.Environment;
 
-  constructor(options?: NjkRendererOptions) {
-    this._njk = njk.configure(options?.paths ?? INTERNAL_TEMPLATE_DIR, {
+  constructor(options?: NunjucksRendererOptions) {
+    const { rootDirs = [] } = options ?? {};
+
+    this._njk = njk.configure([INTERNAL_NJK_TEMPLATE_DIR, ...rootDirs], {
       autoescape: false,
       lstripBlocks: true,
       trimBlocks: true,
@@ -30,7 +36,7 @@ export class NjkRenderer {
     this._njk.addGlobal('ts', ts);
   }
 
-  render(templatePath: string, context: object) {
+  render(templatePath: string, context: TemplateContext) {
     return this._njk.render(templatePath, context);
   }
 }
