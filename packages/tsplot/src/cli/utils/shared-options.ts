@@ -202,7 +202,7 @@ export function getProjectView(options: SharedOptions): ProjectView {
       'the "split" option is ignored because the "from" option is not set'
     );
 
-  projectView.filters.add(
+  projectView.filter.add(
     includeMemberKindOf(...((options.includeTypes ?? []) as MemberKind[])),
     excludeMemberKindOf(...((options.excludeTypes ?? []) as MemberKind[])),
     includeDecoratedBy(...(options.includeDecoratedBy ?? [])),

@@ -1,5 +1,5 @@
 import { Member } from '../core';
-import { FilterSet } from '../filter/filter-set';
+import { FilterSet } from '../filter';
 
 export interface DiagramOptions {
   /**

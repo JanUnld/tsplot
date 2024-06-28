@@ -20,13 +20,13 @@ export class ProjectView {
   private _files: ProjectFile[];
   private _members: Member[];
 
-  readonly filters = new FilterSet<Member>();
+  readonly filter = new FilterSet<Member>();
 
   get files(): ProjectFile[] {
     return this._files;
   }
   get members(): Member[] {
-    return this.filters.apply(this._members);
+    return this.filter.apply(this._members);
   }
 
   constructor(options: ProjectViewOptions) {
