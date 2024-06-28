@@ -1,12 +1,12 @@
 {% extends 'puml/base.njk' %}
 
 {% block content %}
-  {% for member in members %}
+  {% for member in graph.members %}
     {% block member %}
       {% include 'puml/member.njk' %}
     {% endblock %}
   {% endfor %}
-  {% for edge in edges %}
+  {% for edge in graph.edges %}
     {% block edge %}
       {% include 'puml/edge.njk' %}
     {% endblock %}

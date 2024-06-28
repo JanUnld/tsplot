@@ -56,15 +56,15 @@ export async function stats(options: StatsOptions) {
   setupLogLevel(options);
   logSharedOptions(options);
 
-  const graph = getProjectView(options);
-  const members = await getProjectMembersAndStartFrom(graph, options);
-  const edges = getEdges(graph.members);
+  const view = getProjectView(options);
+  const members = await getProjectMembersAndStartFrom(view, options);
+  const edges = getEdges(view.members);
   const decoratedBy = members
     .flatMap((m) => m.decorators.map((d) => d.name))
     .reduce(groupSums, {});
 
   let stats: Record<string, unknown> = {
-    files: graph.files.length,
+    files: view.files.length,
     members: members.length,
     edges: edges.length,
     classes: members.filter(includeMemberKindOf(MemberKind.Class)).length,
@@ -79,13 +79,13 @@ export async function stats(options: StatsOptions) {
   if (Object.keys(decoratedBy).length) stats = { ...stats, decoratedBy };
 
   if (options?.hotspots) {
-    const hotspots = await collectHotspots(graph, options, members);
+    const hotspots = await collectHotspots(view, options, members);
 
     if (Object.keys(hotspots).length) stats = { ...stats, hotspots };
   }
 
   if (options?.linesOfCode) {
-    const linesOfCode = await collectLinesOfCode(graph.files, options);
+    const linesOfCode = await collectLinesOfCode(view.files, options);
 
     stats = { ...stats, linesOfCode };
   }

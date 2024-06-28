@@ -1,1 +1,2 @@
-export * from './njk-renderer';
+export * from './template-file-renderer';
+export * from './nunjucks-renderer';
