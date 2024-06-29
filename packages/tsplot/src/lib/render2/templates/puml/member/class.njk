@@ -1,0 +1,6 @@
+{% extends 'puml/member/interface.njk' %}
+{% if member.isAbstract %}
+  {% set kind = 'abstract class' %}
+{% else %}
+  {% set kind = 'class' %}
+{% endif %}

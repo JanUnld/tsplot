@@ -1,1 +1,25 @@
-{{ member.name }}
+{% if member.kind == 'class' %}
+  {% block class %}
+    {% include 'puml/member/class.njk' %}
+  {% endblock %}
+{% elseif member.kind == 'interface' %}
+  {% block interface %}
+    {% include 'puml/member/interface.njk' %}
+  {% endblock %}
+{% elseif member.kind == 'enum' %}
+  {% block enum %}
+    {% include 'puml/member/enum.njk' %}
+  {% endblock %}
+{% elseif member.kind == 'type' %}
+  {% block type %}
+    {% include 'puml/member/type.njk' %}
+  {% endblock %}
+{% elseif member.kind == 'function' %}
+  {% block function %}
+    {% include 'puml/member/function.njk' %}
+  {% endblock %}
+{% else %}
+  {% block default %}
+    {% include 'puml/member/default.njk' %}
+  {% endblock %}
+{% endif %}
