@@ -1,0 +1,7 @@
+{% extends 'puml/member/interface.njk' %}
+{% set kind = 'protocol' %}
+{% set parentheses = true %}
+{% block content %}
+  -- Function signature --
+  {{ member.typeToString() }}
+{% endblock %}

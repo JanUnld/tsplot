@@ -1,0 +1,15 @@
+{{ kind or 'interface' }} {{ member.name }} {{ puml.stereotype(member.decorators) if member.decorators.length -}}
+{{ '{' if member.fields.length or member.methods.length or parentheses }}
+{% block content %}
+  {% block fields %}
+    {% for f in member.fields %}
+      {{- puml.field(f, hideVisibility) | indent(4, true) }}
+    {% endfor %}
+  {% endblock %}
+  {% block methods %}
+    {% for m in member.methods %}
+      {{- puml.signature(m) | indent(4, true) }}
+    {% endfor %}
+  {% endblock %}
+{% endblock %}
+{{ '}' if member.fields.length or member.methods.length or parentheses }}
