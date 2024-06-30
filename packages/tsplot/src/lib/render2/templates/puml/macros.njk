@@ -1,31 +1,30 @@
-{% macro access(member) -%}
-{{ member | visibility + ' ' if member | visibility -}}
-{{ '{static} ' if member.isStatic -}}
-{{ '{abstract} ' if member.isAbstract }}
+{% import 'common/macros.njk' as common %}
+
+{% macro access(m) -%}
+  {% set v = common.visibility(m) %}
+  {{- (v + ' ') if v.length -}}
+  {{ '{static} ' if m.isStatic -}}
+  {{ '{abstract} ' if m.isAbstract }}
 {%- endmacro %}
 
 {% macro field(field) -%}
-{{ access(field) -}}
-{{ field.name }}{{ '?' if field.isOptional }}: {{ field.typeToString({ removeUndefined: field.isOptional }) }}
+  {{ access(field) -}}
+  {{- field.name }}{{ '?' if field.isOptional }}: {{ field.typeToString({ removeUndefined: field.isOptional }) }}
 {%- endmacro %}
 
 {% macro signature(fn) -%}
-{{ access(fn) -}}
-{{ fn.name }}({{ params(fn.params) }}): {{ fn.returnTypeToString() }}
+  {{ access(fn) -}}
+  {{ fn.name }}({{ params(fn.params) }}): {{ fn.returnTypeToString() }}
 {%- endmacro %}
 
 {% macro param(param) -%}
-{{ '...' if param.isRest }}{{ field(param) }}
+  {{ '...' if param.isRest }}{{ field(param) }}
 {%- endmacro %}
 
 {% macro params(params) -%}
-{{ params.map(param) | join(', ') }}
+  {{ params.map(param) | join(', ') }}
 {%- endmacro %}
 
-{% macro edge(edge, connection = '--') -%}
-{{ edge.from.name }}{{ connection }}{{ edge.to.name }}
-{% endmacro %}
-
 {% macro stereotype(stereotypes) -%}
-<<{{ stereotypes | join(', ', 'name') }}>>{{ ' ' }}
+  <<{{ stereotypes | join(', ', 'name') }}>>{{ ' ' }}
 {%- endmacro %}

@@ -1,4 +1,0 @@
-# This editor configuration file exclusively used for templates
-
-[{macros.njk,*.macro.njk}]
-indent_size = 0

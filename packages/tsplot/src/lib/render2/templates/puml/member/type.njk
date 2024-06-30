@@ -1,5 +1,5 @@
 {% extends 'puml/member/interface.njk' %}
-{% set parentheses = true %}
+{% set forceBrackets = true %}
 {% block content %}
   {{- '__ Type __' | indent(4, true) + '\n' }}
   {{- member.typeToString({ format: ts.TypeFormatFlags.NodeBuilderFlagsMask })
