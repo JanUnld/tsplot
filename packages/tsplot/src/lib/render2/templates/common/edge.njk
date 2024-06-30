@@ -1,0 +1,25 @@
+{% import 'common/macros.njk' as common -%}
+
+{% if edge.type == 'association' %}
+  {% block association %}
+    {{- common.edge(edge, '..') }}
+  {% endblock %}
+{% elseif edge.type == 'composition' %}
+  {% block composition %}
+    {{- common.edge(edge, '--*') }}
+  {% endblock %}
+{% elseif edge.type == 'aggregation' %}
+  {% block aggregation %}
+    {{- common.edge(edge, '--o') }}
+  {% endblock %}
+{% else %}
+  {% if ts.isClassLike(edge.from.node) %}
+    {% block classLike %}
+      {{- common.edge(edge, '-->') }}
+    {% endblock %}
+  {% else %}
+    {% block default %}
+      {{- common.edge(edge, '..>') }}
+    {% endblock %}
+  {% endif %}
+{% endif %}

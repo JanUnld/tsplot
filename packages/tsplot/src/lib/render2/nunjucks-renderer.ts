@@ -1,7 +1,6 @@
 import * as njk from 'nunjucks';
 import { resolve } from 'path';
 import * as ts from 'typescript';
-import { renderVisibility } from '../render/renderer';
 import {
   TemplateContext,
   TemplateFileRenderer,
@@ -35,7 +34,6 @@ export class NunjucksRenderer implements TemplateFileRenderer {
     });
 
     this._njk.addGlobal('ts', ts);
-    this._njk.addFilter('visibility', renderVisibility);
   }
 
   render(templatePath: string, context: TemplateContext) {

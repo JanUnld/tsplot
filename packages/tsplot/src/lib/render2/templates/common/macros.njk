@@ -1,0 +1,9 @@
+{% macro visibility(m) -%}
+  {{- '+' if m.isPublic -}}
+  {{- '#' if m.isProtected -}}
+  {{- '-' if m.isPrivate -}}
+{%- endmacro %}
+
+{% macro edge(edge, connection = '--') -%}
+  {{ edge.from.name }}{{ connection }}{{ edge.to.name }}
+{%- endmacro %}

@@ -1,0 +1,25 @@
+{% if member.kind == 'class' %}
+  {% block class %}
+    {% include baseDir + '/member/class.njk' %}
+  {% endblock %}
+{% elseif member.kind == 'interface' %}
+  {% block interface %}
+    {% include baseDir + '/member/interface.njk' %}
+  {% endblock %}
+{% elseif member.kind == 'enum' %}
+  {% block enum %}
+    {% include baseDir + '/member/enum.njk' %}
+  {% endblock %}
+{% elseif member.kind == 'type' %}
+  {% block type %}
+    {% include baseDir + '/member/type.njk' %}
+  {% endblock %}
+{% elseif member.kind == 'function' %}
+  {% block function %}
+    {% include baseDir + '/member/function.njk' %}
+  {% endblock %}
+{% else %}
+  {% block default %}
+    {% include baseDir + '/member/default.njk' %}
+  {% endblock %}
+{% endif %}

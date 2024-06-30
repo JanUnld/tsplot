@@ -1,0 +1,5 @@
+{% extends 'mmd/member/class.njk' %}
+{% set forceBrackets = true %}
+{% block content %}
+  {{- mmd.signature(member) | indent(8, true) }}
+{% endblock %}

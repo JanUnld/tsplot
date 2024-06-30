@@ -1,5 +1,7 @@
+{% set brackets = forceBrackets or member.fields.length or member.methods.length -%}
+
 {{ kind or 'interface' }} {{ member.name }} {{ puml.stereotype(member.decorators) if member.decorators.length -}}
-{{ '{' if member.fields.length or member.methods.length or parentheses }}
+{{ '{' if brackets }}
 {% block content %}
   {% block fields %}
     {% for f in member.fields %}
@@ -12,4 +14,4 @@
     {% endfor %}
   {% endblock %}
 {% endblock %}
-{{ '}' if member.fields.length or member.methods.length or parentheses }}
+{{ '}' if brackets }}

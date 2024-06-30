@@ -1,0 +1,46 @@
+{% import 'common/macros.njk' as common %}
+
+{% macro visibility(m) -%}
+  {% set v = common.visibility(m) %}
+  {{- (v + ' ') if v.length -}}
+{%- endmacro %}
+
+{% macro access(m) -%}
+  {{ '$' if m.isStatic -}}
+  {{ '*' if m.isAbstract }}
+{%- endmacro %}
+
+{% macro field(field) -%}
+  {{ visibility(field) -}}
+  {{- field.name }}{{ '?' if field.isOptional -}}
+  {{- access(field) -}}
+{%- endmacro %}
+
+{% macro signature(fn) -%}
+  {{ visibility(fn) -}}
+  {{- fn.name }}({{ params(fn.params) -}})
+  {{- access(fn) -}}
+{%- endmacro %}
+
+{% macro param(param) -%}
+  {{ '...' if param.isRest }}{{ field(param) }}
+{%- endmacro %}
+
+{% macro params(params) -%}
+  {{ params.map(param) | join(', ') }}
+{%- endmacro %}
+
+{% macro annotation(m) -%}
+  {%- set isService = (m == 'service') -%}
+  {%- set isInterface = (m.kind == 'interface' or m.kind == 'type') -%}
+  {%- set isEnum = (m.kind == 'enum') -%}
+  {%- set isAbstract = m.isAbstract -%}
+  {%- set mayBeAnnotated = isService or isAbstract or isInterface or isEnum -%}
+
+  {{- '<<' if mayBeAnnotated -}}
+  {{- 'service' if isService }}
+  {{- 'abstract' if isAbstract }}
+  {{- 'interface' if isInterface }}
+  {{- 'enum' if isEnum }}
+  {{- '>>' if mayBeAnnotated -}}
+{%- endmacro %}

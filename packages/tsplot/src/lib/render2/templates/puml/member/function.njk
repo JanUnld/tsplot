@@ -1,6 +1,6 @@
 {% extends 'puml/member/interface.njk' %}
 {% set kind = 'protocol' %}
-{% set parentheses = true %}
+{% set forceBrackets = true %}
 {% block content %}
   {{- '__ Function __'  | indent(4, true) + '\n' }}
   {{- member.typeToString()  | indent(4, true) }}
