@@ -1,14 +1,15 @@
-{% extends 'puml/base.njk' -%}
+{% extends 'mmd/base.njk' -%}
+{% set diagramType = 'classDiagram' -%}
 
 {% block content %}
   {% for member in graph.members %}
     {% block member %}
-      {% include 'puml/member.njk' %}
+      {% include 'mmd/member.njk' %}
     {% endblock %}
   {% endfor %}
   {% for edge in graph.edges %}
     {% block edge %}
-      {% include 'common/edge.njk' %}
+      {% include 'mmd/edge.njk' %}
     {% endblock %}
   {% endfor %}
 {% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'common/edge.njk' -%}
+
+{% block association %}
+  {{- common.edge(edge, '..') | indent(4, true) }}
+{% endblock %}
+{% block composition %}
+  {{- common.edge(edge, '--*') | indent(4, true) }}
+{% endblock %}
+{% block aggregation %}
+  {{- common.edge(edge, '--o') | indent(4, true) }}
+{% endblock %}
+{% block classLike %}
+  {{- common.edge(edge, '-->') | indent(4, true) }}
+{% endblock %}
+{% block default %}
+  {{- common.edge(edge, '..>') | indent(4, true) }}
+{% endblock %}
