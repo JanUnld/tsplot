@@ -6,5 +6,7 @@ export interface TemplateContext {
 }
 
 export interface TemplateFileRenderer {
+  setBaseDir(path: string): void;
+
   render(templatePath: string, context: TemplateContext): string;
 }
