@@ -4,7 +4,7 @@ import {
   insertBeforeExtension,
   interpolate,
   INTERPOLATION_REGEX,
-} from '../../lib/utils/interpolation';
+} from '../../lib/utils';
 import {
   getProjectMembersAndStartFrom,
   getProjectView,

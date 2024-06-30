@@ -11,7 +11,7 @@ const INTERNAL_NJK_TEMPLATE_DIR = resolve(__dirname, 'templates');
 
 export interface NunjucksRendererOptions extends njk.ConfigureOptions {
   /** Base directory paths for the renderer to find any template files */
-  rootDirs?: string[];
+  baseDirs?: string[];
 }
 
 /**
@@ -21,22 +21,32 @@ export interface NunjucksRendererOptions extends njk.ConfigureOptions {
  * this library
  */
 export class NunjucksRenderer implements TemplateFileRenderer {
-  private readonly _njk: njk.Environment;
+  private _njk: njk.Environment = this._createEnv();
 
   constructor(options?: NunjucksRendererOptions) {
-    const { rootDirs = [] } = options ?? {};
+    this._createEnv(options);
+  }
 
-    this._njk = njk.configure([INTERNAL_NJK_TEMPLATE_DIR, ...rootDirs], {
+  setBaseDir(path: string) {
+    this._createEnv({ baseDirs: [path] });
+  }
+
+  render(templatePath: string, context: TemplateContext) {
+    return this._njk.render(templatePath, context);
+  }
+
+  private _createEnv(options?: NunjucksRendererOptions) {
+    const { baseDirs = [] } = options ?? {};
+
+    const env = njk.configure([INTERNAL_NJK_TEMPLATE_DIR, ...baseDirs], {
       autoescape: false,
       lstripBlocks: true,
       trimBlocks: true,
       noCache: true,
     });
 
-    this._njk.addGlobal('ts', ts);
-  }
+    env.addGlobal('ts', ts);
 
-  render(templatePath: string, context: TemplateContext) {
-    return this._njk.render(templatePath, context);
+    return env;
   }
 }

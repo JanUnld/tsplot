@@ -5,7 +5,7 @@
 {% block content %}
   {% block fields %}
     {% for f in member.fields %}
-      {{- puml.field(f, hideVisibility) | indent(4, true) }}
+      {{- puml.field(f) | indent(4, true) }}
     {% endfor %}
   {% endblock %}
   {% block methods %}
