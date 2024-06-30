@@ -1,6 +1,10 @@
 {% extends 'puml/member/interface.njk' %}
 {% set parentheses = true %}
 {% block content %}
-  -- Type alias --
-  {{ member.typeToString({ format: format or ts.TypeFormatFlags.NodeBuilderFlagsMask }) }}
+  {{- '__ Type __' | indent(4, true) + '\n' }}
+  {{- member.typeToString({ format: ts.TypeFormatFlags.NodeBuilderFlagsMask })
+  | replace('\'', '"')
+  | replace('}', ' }')
+  | replace('    ', ' ')
+  | indent(4, true) }}
 {% endblock %}

@@ -2,6 +2,6 @@
 {% set kind = 'protocol' %}
 {% set parentheses = true %}
 {% block content %}
-  -- Function signature --
-  {{ member.typeToString() }}
+  {{- '__ Function __'  | indent(4, true) + '\n' }}
+  {{- member.typeToString()  | indent(4, true) }}
 {% endblock %}
