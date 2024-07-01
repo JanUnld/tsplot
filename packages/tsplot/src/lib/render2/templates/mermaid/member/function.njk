@@ -1,0 +1,5 @@
+{% extends 'mermaid/member/class.njk' %}
+{% set forceBrackets = true %}
+{% block content %}
+  {{- mermaid.signature(member) | indent(8, true) }}
+{% endblock %}
