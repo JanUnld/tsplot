@@ -1,8 +1,7 @@
-import { ProjectGraph, ProjectView } from '../core';
+import { ProjectView } from '../core';
 
-export interface TemplateContext {
-  view: ProjectView;
-  graph: ProjectGraph;
+export interface TemplateContext extends Record<string, unknown> {
+  projectView: ProjectView;
 }
 
 export interface TemplateFileRenderer {

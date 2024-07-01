@@ -9,6 +9,7 @@ import {
 /** @internal */
 const INTERNAL_NJK_TEMPLATE_DIR = resolve(__dirname, 'templates');
 
+/** @internal */
 export interface NunjucksRendererOptions extends njk.ConfigureOptions {
   /** Base directory paths for the renderer to find any template files */
   baseDirs?: string[];
@@ -19,6 +20,8 @@ export interface NunjucksRendererOptions extends njk.ConfigureOptions {
  * of the generation of diagram related files. This class is supposed to also
  * accept custom templates that will override any base templates defined inside
  * this library
+ *
+ * @internal
  */
 export class NunjucksRenderer implements TemplateFileRenderer {
   private _njk: njk.Environment = this._createEnv();

@@ -1,4 +1,4 @@
-{% set annotation = mmd.annotation(member) %}
+{% set annotation = mermaid.annotation(member) %}
 {% set brackets = forceBrackets or member.fields.length or member.methods.length or annotation.length -%}
 
 {{ 'class' | indent(4, true) }} {{ member.name }} {{ '{' if brackets }}
@@ -6,12 +6,12 @@
   {{- (annotation | indent(8, true) + '\n') if annotation.length -}}
   {% block fields %}
     {% for f in member.fields %}
-      {{- mmd.field(f) | indent(8, true) }}
+      {{- mermaid.field(f) | indent(8, true) }}
     {% endfor %}
   {% endblock %}
   {% block methods %}
     {% for m in member.methods %}
-      {{- mmd.signature(m) | indent(8, true) }}
+      {{- mermaid.signature(m) | indent(8, true) }}
     {% endfor %}
   {% endblock %}
 {% endblock %}
