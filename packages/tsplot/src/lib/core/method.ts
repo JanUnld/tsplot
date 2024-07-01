@@ -1,7 +1,6 @@
 import * as ts from 'typescript';
 import {
   ACCESS_MODIFIER_FLAGS,
-  AccessModifiers,
   appendIdentifierToSelector,
   dedupeBy,
   getModifierFlagsFromNode,
@@ -12,18 +11,12 @@ import {
   prependDeclToSelector,
   removeDeclFromSelector,
   removeIdentifierFromSelector,
-  ResolvedNode,
   ReturnTypeInfo,
-  TypeInfo,
 } from '../utils';
+import { Field } from './field';
 import { getParamsFromNode, Parameter } from './parameter';
 
-export interface Method
-  extends ResolvedNode,
-    AccessModifiers,
-    TypeInfo,
-    ReturnTypeInfo {
-  name: string;
+export interface Method extends Field, ReturnTypeInfo {
   params: Parameter[];
 }
 

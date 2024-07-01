@@ -1,0 +1,15 @@
+{% extends 'mermaid/base.njk' -%}
+{% set diagramType = 'classDiagram' -%}
+
+{% block content %}
+  {% for member in projectGraph.members %}
+    {% block member %}
+      {% include 'mermaid/member.njk' %}
+    {% endblock %}
+  {% endfor %}
+  {% for edge in projectGraph.edges %}
+    {% block edge %}
+      {% include 'mermaid/edge.njk' %}
+    {% endblock %}
+  {% endfor %}
+{% endblock %}

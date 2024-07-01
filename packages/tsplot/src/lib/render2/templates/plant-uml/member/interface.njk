@@ -1,16 +1,16 @@
 {% set brackets = forceBrackets or member.fields.length or member.methods.length -%}
 
-{{ kind or 'interface' }} {{ member.name }} {{ puml.stereotype(member.decorators) if member.decorators.length -}}
+{{ kind or 'interface' }} {{ member.name }} {{ plantUml.stereotype(member.decorators) if member.decorators.length -}}
 {{ '{' if brackets }}
 {% block content %}
   {% block fields %}
     {% for f in member.fields %}
-      {{- puml.field(f) | indent(4, true) }}
+      {{- plantUml.field(f) | indent(4, true) }}
     {% endfor %}
   {% endblock %}
   {% block methods %}
     {% for m in member.methods %}
-      {{- puml.signature(m) | indent(4, true) }}
+      {{- plantUml.signature(m) | indent(4, true) }}
     {% endfor %}
   {% endblock %}
 {% endblock %}

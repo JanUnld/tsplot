@@ -1,12 +1,12 @@
-{% extends 'puml/base.njk' -%}
+{% extends 'plant-uml/base.njk' -%}
 
 {% block content %}
-  {% for member in graph.members %}
+  {% for member in projectGraph.members %}
     {% block member %}
-      {% include 'puml/member.njk' %}
+      {% include 'plant-uml/member.njk' %}
     {% endblock %}
   {% endfor %}
-  {% for edge in graph.edges %}
+  {% for edge in projectGraph.edges %}
     {% block edge %}
       {% include 'common/edge.njk' %}
     {% endblock %}
