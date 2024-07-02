@@ -14,19 +14,15 @@ export enum BuiltInTemplateTarget {
   Mermaid = 'mermaid',
 }
 
-function isBuiltInTemplate(str: string): str is BuiltInTemplateTarget {
-  return Object.values(BuiltInTemplateTarget).includes(
-    str as BuiltInTemplateTarget
-  );
-}
-
 /** Options and flexible {@link TemplateContext} for rendering  */
-export interface RenderOptions extends TemplateContext {
+export interface RenderOptions {
   /**
    * Either a {@link BuiltInTemplateTarget} or a subdirectory of {@link baseDir}
    * that is supposed to point to a directory name containing template files
    */
   target: BuiltInTemplateTarget | string;
+  /** The context that is handed to the template when rendering */
+  context: TemplateContext;
   /** Custom {@link TemplateFileRenderer} implementation to use for rendering */
   renderer?: TemplateFileRenderer;
   /**
@@ -45,7 +41,7 @@ export interface RenderOptions extends TemplateContext {
  * ```typescript
  * render(BuiltInTemplate.ClassDiagram, {
  *   target: BuiltInTemplate.PlantUML,
- *   projectView
+ *   context: { projectView },
  * });
  * ```
  *
@@ -55,9 +51,9 @@ export interface RenderOptions extends TemplateContext {
  *
  * ```typescript
  * render('custom-template', {
- *   baseDir: path.resolve(__dirname, '.tsplot')
- *   target: 'templates',
- *   projectView,
+ *   baseDir: path.resolve(__dirname, '.tsplot'),
+ *   context: { projectView },
+ *   target: 'templates'
  * });
  * ```
  *
@@ -65,15 +61,7 @@ export interface RenderOptions extends TemplateContext {
  * plant-uml). It can also be any other desired output format (ex. markdown)
  *
  * @param template Either a {@link BuiltInTemplate} or custom template name
- * @param options Required and other options for rendering
- * @param options.view Required {@link ProjectView} instance
- * @param options.target Required {@link RenderOptions.target}
- * @param options.renderer Optional custom {@link TemplateFileRenderer} instance
- *  to provide an alternative rendering implementation. This **does** overwrite
- *  the internally used {@link NunjucksRenderer}. Make sure to provide the proper
- *  template syntax and file extensions in case you're using this!
- * @param options.baseDir Optional custom base directory to register. **Does not**
- *  overwrite any built in paths used by default (e.g. `puml`, `mmd`)
+ * @param options Required and other {@link RenderOptions}
  */
 export function render(
   template: BuiltInTemplate | string,
@@ -90,7 +78,7 @@ export function render(
   }
 
   return renderer.render(`${target}/${template}.njk`, {
-    projectGraph: ProjectGraph.fromView(options.projectView),
-    ...options,
+    projectGraph: ProjectGraph.fromView(options.context.projectView),
+    ...options.context,
   });
 }

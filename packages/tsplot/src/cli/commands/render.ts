@@ -61,9 +61,9 @@ export async function render(
   const view = getProjectView(options);
   const renderView = (projectView: ProjectView) =>
     _render(template, {
-      target: options.target,
       baseDir: options.baseDir,
-      projectView,
+      context: { projectView },
+      target: options.target,
     });
 
   if (options.debug) {

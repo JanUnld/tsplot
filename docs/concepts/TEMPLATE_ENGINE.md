@@ -12,17 +12,19 @@ Template languages and engines are a solved problem, so it won't be necessary to
 The following is an example of how to render a class-diagram using the Nunjucks template engine:
 
 ```typescript
-import { render, ProjectView, ProjectGraph } from 'tsplot';
+import { render, ProjectView, ProjectGraph, BuiltInTemplate, BuiltInTemplateTarget } from 'tsplot';
 
-const view = new ProjectView();
-const graph = ProjectGraph.fromView(view);
+const projectView = new ProjectView({ tsConfigPath });
 
-const puml = render('class-diagram', { template: 'puml', view, graph });
+const puml = render(BuiltInTemplate.ClassDiagram, {
+  target: BuiltInTemplateTarget.PlantUML,
+  context: { projectView }
+});
 ```
 
 ## Customizing Templates
 
-Templates can be customized quite easily either by overwriting or extending already existing templates. The following is an example of how to extend the class-diagram template (e.g. `custom/class-diagram.njk`):
+Templates can be customized quite easily either by overwriting or extending already existing templates. The following is an example of how to extend the class-diagram template (e.g. `.tsplot/templates/custom/class-diagram.njk`):
 
 ```nunjucks
 {% extends 'puml/class-diagram.njk' %}
@@ -39,8 +41,7 @@ import { resolve } from 'path';
 
 const puml = render('class-diagram', {
   baseDir: resolve(__dirname, '.tsplot/templates'),
-  template: 'custom',
-  graph,
-  view
+  context: { projectView },
+  target: 'custom'
 });
 ```

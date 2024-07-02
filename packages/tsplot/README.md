@@ -14,14 +14,44 @@ npx tsplot --help
 Usage: tsplot [options] [command]
 
 Options:
-  -h, --help         display help for command
+  -h, --help                   display help for command
 
 Commands:
-  diagram [options]  generate different types of diagrams for a typescript project based on its dependency graph
-  stats [options]    generate statistics for a typescript project
-  help [command]     display help for command
+  diagram [options]            DEPRECATED! use "render <template>" command instead
+  stats [options]              generate statistics for a typescript project
+  render [options] <template>  renders typescript AST and type checker information to a desired target format using built-in and
+                               custom templates (e.g. plant-uml, mermaid)
+  help [command]               display help for command
 ```
+
+## Templates
+
+There are currently two template targets available:
+
+- [`plant-uml`](https://plantuml.com/)
+- [`mermaid`](https://mermaid-js.github.io/mermaid/#/)
+
+They can be set using the `--target [name]` option when using the `render` command.
+
+### Custom templates
+
+Built-in templates are implemented using [Nunjucks](https://mozilla.github.io/nunjucks/). They are available for the `plant-uml` and `mermaid` targets and can be extended. Make sure to check the [template engine concept](https://github.com/JanUnld/tsplot/blob/main/docs/concepts/TEMPLATE_ENGINE.md) for more information.
 
 ## Example
 
-![tsplot](./tsplot.svg)
+Executing the shell command below:
+
+```shell
+npx tsplot render class-diagram \ 
+  --output './example.puml' \
+  --includeName 'Project*' 'Template*' 'render' 'RenderOptions' \
+  --exclude '**/cli/**'
+```
+
+Generates the Plant UML code in [`example.puml`](./examples/example.puml), which results in the following diagram:
+
+![example](./examples/example.svg)
+
+A _full_ overview of this project looks like this:
+
+![tsplot](./examples/tsplot.svg)
