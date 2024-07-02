@@ -1,4 +1,5 @@
 import { Command, Option } from 'commander';
+import { consola } from 'consola';
 import {
   BuiltInTemplate,
   BuiltInTemplateTarget,
@@ -6,12 +7,13 @@ import {
   render as _render,
 } from '../../lib';
 import {
+  collectStats,
   getConfinedProjectViewFromMemberOrDefault,
   getProjectView,
   interpolateOutputPath,
   logSharedOptions,
   output,
-  setupLogLevel,
+  setupConsola,
   setupSharedOptions,
   SharedOptions,
 } from '../utils';
@@ -53,7 +55,7 @@ export async function render(
   template: BuiltInTemplate | string,
   options: RenderOptions
 ) {
-  setupLogLevel(options);
+  setupConsola(options);
   logSharedOptions(options);
 
   const view = getProjectView(options);
@@ -63,6 +65,12 @@ export async function render(
       baseDir: options.baseDir,
       projectView,
     });
+
+  if (options.debug) {
+    const s = await collectStats({ ...options, silent: true });
+
+    consola.debug('stats:', JSON.stringify(s, null, 2));
+  }
 
   if (!options.split || !options?.from) {
     const confinedView = await getConfinedProjectViewFromMemberOrDefault(

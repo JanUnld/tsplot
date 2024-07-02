@@ -1,12 +1,17 @@
 import { Command, Option } from 'commander';
-import { Member, MermaidClassDiagram, PlantUMLClassDiagram } from '../../lib';
+import { consola } from 'consola';
+import {
+  BuiltInTemplateTarget,
+  Member,
+  MermaidClassDiagram,
+  PlantUMLClassDiagram,
+} from '../../lib';
 import {
   collectStats,
-  getProjectMembersAndStartFrom,
+  getConfinedProjectViewFromMemberOrDefault,
   getProjectView,
-  insertBeforeExtension,
-  interpolate,
-  INTERPOLATION_REGEX,
+  interpolateOutputPath,
+  logDeprecationWarning,
   logSharedOptions,
   output,
   setupConsola,
