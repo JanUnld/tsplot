@@ -36,7 +36,7 @@ export function setupDiagramCommand(program: Command) {
   return setupSharedOptions(
     program
       .command('diagram')
-      .description('DEPRECATED! use "tsplot <template>" main command instead')
+      .description('DEPRECATED! use "render <template>" command instead')
       .option(
         '-e, --edgeless',
         'indicates whether nodes without any edges shall be rendered or not',
