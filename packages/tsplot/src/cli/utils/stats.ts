@@ -3,7 +3,7 @@ import { groupSums } from './accumulators';
 import { collectHotspots, HotspotOptions } from './hotspots';
 import { collectLinesOfCode, LinesOfCodeOptions } from './lines-of-code';
 import {
-  getProjectMembersAndStartFrom,
+  getConfinedProjectViewFromMemberOrDefault,
   getProjectView,
   setupConsola,
   SharedOptions,
@@ -32,15 +32,18 @@ export interface Stats {
 export async function collectStats(options: StatsOptions) {
   const restoreConsola = setupConsola(options);
 
-  const projectView = getProjectView(options);
-  const members = await getProjectMembersAndStartFrom(projectView, options);
-  const edges = getEdges(projectView.members);
+  const confinedView = await getConfinedProjectViewFromMemberOrDefault(
+    getProjectView(options),
+    options
+  );
+  const members = confinedView.members;
+  const edges = getEdges(confinedView.members);
   const decoratedBy = members
     .flatMap((m) => m.decorators.map((d) => d.name))
     .reduce(groupSums, {});
 
   let stats: Stats = {
-    files: projectView.files.length,
+    files: confinedView.files.length,
     members: members.length,
     edges: edges.length,
     classes: members.filter(includeMemberKindOf(MemberKind.Class)).length,
@@ -55,13 +58,13 @@ export async function collectStats(options: StatsOptions) {
   if (Object.keys(decoratedBy).length) stats = { ...stats, decoratedBy };
 
   if (options?.hotspots) {
-    const hotspots = await collectHotspots(projectView, options, members);
+    const hotspots = await collectHotspots(confinedView, options, members);
 
     if (Object.keys(hotspots).length) stats = { ...stats, hotspots };
   }
 
   if (options?.linesOfCode) {
-    const linesOfCode = await collectLinesOfCode(projectView.files, options);
+    const linesOfCode = await collectLinesOfCode(confinedView.files, options);
 
     stats = { ...stats, linesOfCode };
   }

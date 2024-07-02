@@ -22,7 +22,7 @@ import {
   insertBeforeExtension,
   interpolate,
   INTERPOLATION_REGEX,
-} from '../../lib/utils';
+} from './interpolation';
 
 /** @internal */
 const MEMBER_TYPES: MemberKind[] = Object.values(MemberKind);
