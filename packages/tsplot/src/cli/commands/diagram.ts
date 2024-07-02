@@ -1,5 +1,4 @@
-import { Option, program } from 'commander';
-import { consola } from 'consola';
+import { Command, Option } from 'commander';
 import { Member, MermaidClassDiagram, PlantUMLClassDiagram } from '../../lib';
 import {
   collectStats,
@@ -15,23 +14,24 @@ import {
   SharedOptions,
 } from '../utils';
 
-export type BuiltInRenderer = 'plant-uml' | 'mermaid';
-
+/** @deprecated */
 export interface DiagramOptions extends SharedOptions {
   edgeless?: boolean;
-  renderer?: BuiltInRenderer;
+  renderer?: BuiltInTemplateTarget;
   fields?: boolean;
   methods?: boolean;
   // type: string; // Diagram type
 }
 
-export function setupDiagramCommand() {
-  setupSharedOptions(
+/**
+ * @deprecated
+ * @internal
+ */
+export function setupDiagramCommand(program: Command) {
+  return setupSharedOptions(
     program
       .command('diagram')
-      .description(
-        'generate different types of diagrams for a typescript project based on its dependency graph'
-      )
+      .description('DEPRECATED! use "tsplot <template>" main command instead')
       .option(
         '-e, --edgeless',
         'indicates whether nodes without any edges shall be rendered or not',
@@ -51,17 +51,19 @@ export function setupDiagramCommand() {
       .option('--no-methods', "don't include methods in the diagram")
       .addOption(
         new Option(
-          '-r, --renderer <name>',
+          '-r, --renderer <name>, --target <name>',
           'the type of the renderer to be used'
         )
           .choices(['plant-uml', 'mermaid'])
           .default('plant-uml')
       )
-    // todo: add support for different renderers and diagram types
-    //  .option('-t, --type <type>', 'type of the output diagram (depends on the renderer)', 'class')
   ).action(diagram);
 }
 
+/**
+ * @deprecated
+ * @internal
+ */
 export function getDiagramRenderer(
   options: DiagramOptions
 ): (member: Member[], options: DiagramOptions) => string {
@@ -92,22 +94,13 @@ export function getDiagramRenderer(
   }
 }
 
-export function interpolateOutputPath(
-  output: string,
-  values: Record<string, unknown>
-) {
-  const { memberName } = values;
-
-  if (!memberName) return output;
-
-  return INTERPOLATION_REGEX.test(output)
-    ? interpolate(output, values)
-    : insertBeforeExtension(output, memberName.toString());
-}
-
+/** @deprecated */
 export async function diagram(options: DiagramOptions) {
   setupConsola(options);
   logSharedOptions(options);
+  logDeprecationWarning('"diagram" command', {
+    replaceWith: '"render <template>" command',
+  });
 
   const projectView = getProjectView(options);
   const render = getDiagramRenderer(options);
@@ -119,13 +112,16 @@ export async function diagram(options: DiagramOptions) {
   }
 
   if (!options.split || !options?.from) {
-    const members = await getProjectMembersAndStartFrom(projectView, options);
+    const confinedView = await getConfinedProjectViewFromMemberOrDefault(
+      projectView,
+      options
+    );
 
-    await output(render(members, options), options);
+    await output(render(confinedView.members, options), options);
   } else {
     const memberBatch = await Promise.all(
       options.from.map((m) =>
-        getProjectMembersAndStartFrom(projectView, {
+        getConfinedProjectViewFromMemberOrDefault(projectView, {
           ...options,
           from: [m],
         })
@@ -133,8 +129,8 @@ export async function diagram(options: DiagramOptions) {
     );
 
     await Promise.all(
-      memberBatch.map((m, index) =>
-        output(render(m, options), {
+      memberBatch.map((confinedView, index) =>
+        output(render(confinedView.members, options), {
           ...options,
           output: interpolateOutputPath(options.output!, {
             memberName: options.from![index],

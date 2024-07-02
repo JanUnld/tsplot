@@ -4,3 +4,4 @@ export * from './interpolation';
 export * from './accumulators';
 export * from './hotspots';
 export * from './stats';
+export * from './logs';

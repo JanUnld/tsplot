@@ -1,10 +1,16 @@
 #!/usr/bin/env node
 
 import { program } from 'commander';
-import { setupDiagramCommand } from './commands/diagram';
-import { setupStatsCommand } from './commands/stats';
+import {
+  setupDiagramCommand,
+  setupRenderCommand,
+  setupStatsCommand,
+} from './commands';
 
-setupDiagramCommand();
-setupStatsCommand();
+let bin = program;
 
-program.parse();
+setupDiagramCommand(bin);
+setupStatsCommand(bin);
+setupRenderCommand(bin);
+
+bin.parse();

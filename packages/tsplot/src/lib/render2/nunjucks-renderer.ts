@@ -31,7 +31,7 @@ export class NunjucksRenderer implements TemplateFileRenderer {
   }
 
   setBaseDir(path: string) {
-    this._createEnv({ baseDirs: [path] });
+    this._njk = this._createEnv({ baseDirs: [path] });
   }
 
   render(templatePath: string, context: TemplateContext) {

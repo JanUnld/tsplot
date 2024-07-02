@@ -5,7 +5,7 @@ import { EOL } from 'os';
 import { resolve } from 'path';
 import * as process from 'process';
 import * as ts from 'typescript';
-import { Member, MemberKind, ProjectView } from '../../lib/core';
+import { MemberKind, ProjectView } from '../../lib/core';
 import {
   excludeDecoratedBy,
   excludeMemberKindOf,
@@ -15,13 +15,20 @@ import {
   includeMemberKindOf,
   includeMemberNamespace,
   includeSourceFiles,
+  MemberFilterFn,
+  SourceFileFilterFn,
 } from '../../lib/filter';
+import {
+  insertBeforeExtension,
+  interpolate,
+  INTERPOLATION_REGEX,
+} from '../../lib/utils';
 
 /** @internal */
 const MEMBER_TYPES: MemberKind[] = Object.values(MemberKind);
 
 /** @internal */
-const DEFAULT_DEPTH = 9999;
+const DEFAULT_DEPTH = 42;
 
 /** @internal */
 export interface SharedOptions {
@@ -44,14 +51,26 @@ export interface SharedOptions {
   /** The file paths that shall be excluded from the dependency graph */
   exclude?: string[];
 
-  includeTypes?: string[];
-  excludeTypes?: string[];
+  includeKind?: string[];
+  excludeKind?: string[];
 
   includeDecoratedBy?: string[];
   excludeDecoratedBy?: string[];
 
+  includeName?: string[];
+  excludeName?: string[];
+
+  // <editor-fold desc="Deprecated">
+  /** @deprecated Use {@link includeKind} instead */
+  includeTypes?: string[];
+  /** @deprecated Use {@link excludeKind} instead */
+  excludeTypes?: string[];
+
+  /** @deprecated Use {@link includeName} instead */
   includeNames?: string[];
+  /** @deprecated Use {@link excludeName} instead */
   excludeNames?: string[];
+  // </editor-fold>
 }
 
 /** @internal */
@@ -66,12 +85,12 @@ export function setupSharedOptions(command: Command) {
       .option('-o, --output <path>', 'path to the output file')
       .option(
         '--from <members...>',
-        'the entry members to start resolving the dependency graph from'
+        'the entry member to start the dependency resolution from'
       )
       // todo: .option('--to <members...>', 'the exit members to stop resolving the dependency graph at')
       .option(
         '--depth <depth>',
-        'the depth limit of the dependency graph when using the "from" option',
+        'the depth limit of the dependency resolution, when using the "from" option',
         (value) => parseInt(value, 10),
         DEFAULT_DEPTH
       )
@@ -86,42 +105,63 @@ export function setupSharedOptions(command: Command) {
       )
       .option(
         '--include <paths...>',
-        'file paths that shall be included in the dependency graph'
+        'file paths that shall be included in the view'
       )
       .option(
         '--exclude <paths...>',
-        'file paths that shall be excluded in the dependency graph'
+        'file paths that shall be included in the view'
       )
       .addOption(
         new Option(
-          '--includeTypes <types...>',
-          'types that shall be included in the dependency graph'
-        ).choices(MEMBER_TYPES)
+          '--includeKind <kinds...>',
+          'member kind that shall be included in the view'
+        ).choices(Object.values(MemberKind))
       )
       .addOption(
         new Option(
-          '--excludeTypes <types...>',
-          'types that shall be excluded in the dependency graph'
-        ).choices(MEMBER_TYPES)
+          '--excludeKind <kinds...>',
+          'member kind that shall be included in the view'
+        ).choices(Object.values(MemberKind))
       )
       .option(
         '--includeDecoratedBy <decorators...>',
-        'decorators that shall be included in the dependency graph'
+        'decorators that shall be included in the view'
       )
       .option(
         '--excludeDecoratedBy <decorators...>',
-        'decorators that shall be excluded in the dependency graph'
+        'decorators that shall be included in the view'
       )
       .option(
-        '--includeNames <names...>',
-        'names that shall be included in the dependency graph'
+        '--includeName <names...>',
+        'member name pattern that shall be included in the view'
       )
       .option(
-        '--excludeNames <names...>',
-        'names that shall be excluded in the dependency graph'
+        '--excludeName <names...>',
+        'member name pattern that shall be included in the view'
       )
       .option('-d, --debug', 'output extra debugging logs')
       .option('-s, --silent', 'output nothing but the result')
+      // <editor-fold desc="Deprecated">
+      .option(
+        '--includeNames <names...>',
+        'DEPRECATED! use --includeName instead'
+      )
+      .option(
+        '--excludeNames <names...>',
+        'DEPRECATED! use --excludeName instead'
+      )
+      .addOption(
+        new Option(
+          '--includeTypes <kinds...>',
+          'DEPRECATED! use --includeKind instead'
+        ).choices(Object.values(MemberKind))
+      )
+      .addOption(
+        new Option(
+          '--excludeTypes <kinds...>',
+          'DEPRECATED! use --excludeKind instead'
+        ).choices(Object.values(MemberKind))
+      ) // </editor-fold>
   );
 }
 
@@ -151,12 +191,6 @@ export function getTsConfigPath(options = program.opts<SharedOptions>()) {
 }
 
 /** @internal */
-export function logSharedOptions(options: SharedOptions) {
-  consola.debug('options:', JSON.stringify(options, null, 2));
-  consola.info(`analyzing project at "${getTsConfigPath(options)}"...`);
-}
-
-/** @internal */
 export function getProjectView(options: SharedOptions): ProjectView {
   const isRelevantSourceFile = (f: ts.SourceFile) => {
     return !f.isDeclarationFile && !f.fileName.includes('node_modules');
@@ -165,7 +199,7 @@ export function getProjectView(options: SharedOptions): ProjectView {
   const tsConfigPath = getTsConfigPath(options);
   const projectView = new ProjectView({
     tsConfigPath,
-    filters: [
+    fileFilter: [
       isRelevantSourceFile,
       includeSourceFiles(...(options.include ?? [])),
       excludeSourceFiles(...(options.exclude ?? [])),
@@ -176,12 +210,12 @@ export function getProjectView(options: SharedOptions): ProjectView {
     options.from,
     options.include,
     options.exclude,
-    options.includeTypes,
-    options.excludeTypes,
+    options.includeKind ?? options.includeTypes,
+    options.excludeKind ?? options.excludeTypes,
     options.includeDecoratedBy,
     options.excludeDecoratedBy,
-    options.includeNames,
-    options.excludeNames,
+    options.includeName ?? options.includeNames,
+    options.excludeName ?? options.excludeNames,
   ].some((arr) => arr?.length);
 
   if (isPartialView)
@@ -203,22 +237,30 @@ export function getProjectView(options: SharedOptions): ProjectView {
     );
 
   projectView.filter.add(
-    includeMemberKindOf(...((options.includeTypes ?? []) as MemberKind[])),
-    excludeMemberKindOf(...((options.excludeTypes ?? []) as MemberKind[])),
+    includeMemberKindOf(
+      ...((options.includeKind ?? options.includeTypes ?? []) as MemberKind[])
+    ),
+    excludeMemberKindOf(
+      ...((options.excludeKind ?? options.excludeTypes ?? []) as MemberKind[])
+    ),
     includeDecoratedBy(...(options.includeDecoratedBy ?? [])),
     excludeDecoratedBy(...(options.excludeDecoratedBy ?? [])),
-    includeMemberNamespace(...(options.includeNames ?? [])),
-    excludeMemberNamespace(...(options.excludeNames ?? []))
+    includeMemberNamespace(
+      ...(options.includeName ?? options.includeNames ?? [])
+    ),
+    excludeMemberNamespace(
+      ...(options.excludeName ?? options.excludeNames ?? [])
+    )
   );
 
   return projectView;
 }
 
 /** @internal */
-export async function getProjectMembersAndStartFrom(
+export async function getConfinedProjectViewFromMemberOrDefault(
   projectView: ProjectView,
   options: SharedOptions
-): Promise<Member[]> {
+): Promise<ProjectView> {
   const deferred = options?.from
     ?.map((f) => projectView.getMemberByName(f))
     .filter(Boolean)
@@ -228,7 +270,40 @@ export async function getProjectMembersAndStartFrom(
         : projectView.getDependentMembers(m!, options);
     });
 
-  return deferred ? (await Promise.all(deferred)).flat() : projectView.members;
+  const members = deferred && (await Promise.all(deferred)).flat();
+  if (!members) return projectView;
+
+  // checks whether a given member is included in the confined view of the original
+  // project view. If that's the case, then we want to include it in the new view
+  const isConfinedMemberSourceFile: SourceFileFilterFn = (s) =>
+    members
+      .map((m) => projectView.getFileOfMember(m)?.source.fileName)
+      .some((fileName) => s.fileName === fileName);
+  const isConfinedMember: MemberFilterFn = (m) =>
+    members.some((m2) => m2.name === m.name);
+
+  return new ProjectView({
+    program: projectView.getProgram(),
+    fileFilter: [isConfinedMemberSourceFile],
+    memberFilter: [isConfinedMember, ...projectView.filter.decompose()],
+  });
+}
+
+/**
+ * @internal
+ * @experimental
+ */
+export function interpolateOutputPath(
+  output: string,
+  values: Record<string, unknown>
+) {
+  const { memberName } = values;
+
+  if (!memberName) return output;
+
+  return INTERPOLATION_REGEX.test(output)
+    ? interpolate(output, values)
+    : insertBeforeExtension(output, memberName.toString());
 }
 
 /** @internal */
@@ -240,7 +315,8 @@ export async function output(data: string, options: SharedOptions) {
 
     if (!data)
       consola.warn(
-        'It appears that the output is empty. Please make sure that the project graph is not empty and that the diagram renderer is working as expected.'
+        'It appears that the output is empty. Please make sure that the project ' +
+          'graph is not empty and that the diagram renderer is working as expected.'
       );
 
     await outputFile(outputPath, data, 'utf-8');
