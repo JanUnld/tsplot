@@ -1,4 +1,4 @@
-import { getEdges, includeMemberTypeOf, MemberType } from '../../lib';
+import { getEdges, includeMemberKindOf, MemberKind } from '../../lib';
 import { groupSums } from './accumulators';
 import { collectHotspots, HotspotOptions } from './hotspots';
 import { collectLinesOfCode, LinesOfCodeOptions } from './lines-of-code';
@@ -43,13 +43,13 @@ export async function collectStats(options: StatsOptions) {
     files: projectView.files.length,
     members: members.length,
     edges: edges.length,
-    classes: members.filter(includeMemberTypeOf(MemberType.Class)).length,
-    interfaces: members.filter(includeMemberTypeOf(MemberType.Interface))
+    classes: members.filter(includeMemberKindOf(MemberKind.Class)).length,
+    interfaces: members.filter(includeMemberKindOf(MemberKind.Interface))
       .length,
-    enums: members.filter(includeMemberTypeOf(MemberType.Enum)).length,
-    types: members.filter(includeMemberTypeOf(MemberType.Type)).length,
-    functions: members.filter(includeMemberTypeOf(MemberType.Function)).length,
-    variables: members.filter(includeMemberTypeOf(MemberType.Variable)).length,
+    enums: members.filter(includeMemberKindOf(MemberKind.Enum)).length,
+    types: members.filter(includeMemberKindOf(MemberKind.Type)).length,
+    functions: members.filter(includeMemberKindOf(MemberKind.Function)).length,
+    variables: members.filter(includeMemberKindOf(MemberKind.Variable)).length,
   };
 
   if (Object.keys(decoratedBy).length) stats = { ...stats, decoratedBy };
