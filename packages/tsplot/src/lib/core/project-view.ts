@@ -33,8 +33,12 @@ export class ProjectView {
     this._program = getProgramFromProjectViewOptions(options);
     this._typeChecker = this._program.getTypeChecker();
 
-    this._files = this._getProjectFiles(options.filters);
+    this._files = this._getProjectFiles(options.fileFilter);
     this._members = this.files.flatMap((f) => f.members);
+
+    if (options.memberFilter) {
+      this.filter.add(...options.memberFilter);
+    }
   }
 
   async getDependencyMembers(member: Member, options?: { depth?: number }) {
@@ -106,6 +110,10 @@ export class ProjectView {
       .getExportsOfModule(fileSymbol)
       .map((s) => this.getMemberByName(s.name))
       .filter(Boolean) as Member[];
+  }
+
+  getProgram(): ts.Program {
+    return this._program;
   }
 
   private _getProjectFiles(filters?: SourceFileFilterFn[]): ProjectFile[] {

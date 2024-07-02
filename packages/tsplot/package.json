@@ -5,6 +5,9 @@
   "license": "MIT",
   "author": "Jan Unnold",
   "bin": "./src/cli/bin.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
   "repository": "https://github.com/JanUnld/tsplot",
   "homepage": "https://github.com/JanUnld/tsplot#readme",
   "dependencies": {
@@ -26,6 +29,7 @@
     "stats",
     "diagram",
     "visualization",
+    "template",
     "mermaid",
     "plant-uml",
     "cli"

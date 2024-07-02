@@ -1,4 +1,4 @@
-import { program } from 'commander';
+import { Command } from 'commander';
 import { getEdges, includeMemberKindOf, MemberKind } from '../../lib';
 import {
   logSharedOptions,
@@ -8,8 +8,9 @@ import {
 } from '../utils';
 import { collectStats, StatsOptions } from '../utils/stats';
 
-export function setupStatsCommand() {
-  setupSharedOptions(
+/** @internal */
+export function setupStatsCommand(program: Command) {
+  return setupSharedOptions(
     program
       .command('stats')
       .description('generate statistics for a typescript project')

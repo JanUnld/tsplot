@@ -1,10 +1,11 @@
 import * as ts from 'typescript';
-import { SourceFileFilterFn } from '../filter';
+import { MemberFilterFn, SourceFileFilterFn } from '../filter';
 import { getParsedCommandLine } from '../utils';
 
 /** @internal */
 interface ProjectViewOptionsBase {
-  filters?: SourceFileFilterFn[];
+  fileFilter?: SourceFileFilterFn[];
+  memberFilter?: MemberFilterFn[];
 }
 
 export interface ProjectViewOptionsWithFiles extends ProjectViewOptionsBase {

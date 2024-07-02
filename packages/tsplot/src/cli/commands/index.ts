@@ -1,2 +1,3 @@
-export { diagram, DiagramOptions } from './diagram';
-export { stats, StatsOptions } from './stats';
+export * from './diagram';
+export * from './render';
+export * from './stats';
