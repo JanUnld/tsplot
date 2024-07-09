@@ -20,19 +20,12 @@
 
 ## Resolving exported members
 
-Finding all exported members of a module is not trivial, especially when considering the different ways of exporting members in TypeScript.
+Finding all exported members of a module is not trivial, especially when considering the different ways of exporting members in TypeScript. The `ProjectView` class exposes a dedicated method for resolving exported members of a `ProjectFile`.
 
-The desired approach would be to use the TypeScript compiler API to resolve all exports of a module.
-
-**[Example](https://stackoverflow.com/questions/56999775/how-to-get-exported-members-using-typescript-compiler-api)** — _src. Stack Overflow_
+**Example**
 
 ```typescript
-const moduleExports = typeChecker.getExportsOfModule(symbol);
+const exports = projetView.getExportedMembersOfFile('project-view.ts');
 
-// this prints out ["member1", "member2", ...]
-console.log(moduleExports.map(s => s.name));
+console.log(moduleExports.map(s => s.name)); // → [ 'ProjectView' ]
 ```
-
-This will require a bit of refactoring of the current static analysis of the source files, but it will provide more extensive and accurate type information resolution (advanced types, alias types, etc.). 
-
-See `type-checking` branch for progress on the current refactoring effort.

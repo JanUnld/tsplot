@@ -1,15 +1,15 @@
 import { matchRegExpOrGlob } from '../../utils';
 import { MemberFilterFn } from '../member-filter';
 
-export function includeMemberNamespace(
+export function includeMemberName(
   ...names: (string | RegExp)[]
 ): MemberFilterFn {
   return (m) =>
     !names?.length || names.some((name) => matchRegExpOrGlob(name, m.name));
 }
 
-export function excludeMemberNamespace(
+export function excludeMemberName(
   ...names: (string | RegExp)[]
 ): MemberFilterFn {
-  return (m) => !names?.length || !includeMemberNamespace(...names)(m);
+  return (m) => !names?.length || !includeMemberName(...names)(m);
 }

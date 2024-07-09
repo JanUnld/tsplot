@@ -7,10 +7,7 @@ import {
   getNodesBySelectors,
   getReturnTypeInfoFromNode,
   getTypeInfoFromNode,
-  pipeSelector,
   prependDeclToSelector,
-  removeDeclFromSelector,
-  removeIdentifierFromSelector,
   ReturnTypeInfo,
 } from '../utils';
 import { Field } from './field';
@@ -34,12 +31,8 @@ export function getMethodsFromNode(
     prependDeclToSelector,
     appendIdentifierToSelector,
   ])
-    .map(({ selector, node }) => {
+    .map(({ node }) => {
       return {
-        selector: pipeSelector(selector, [
-          removeDeclFromSelector,
-          removeIdentifierFromSelector,
-        ]),
         node: node.parent,
         name: node.getText(),
         params: getParamsFromNode(node.parent, typeChecker),

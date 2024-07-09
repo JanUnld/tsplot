@@ -1,7 +1,7 @@
 import { query } from '@phenomnomnominal/tsquery';
 import * as ts from 'typescript';
-import { FilterSet, SourceFileFilterFn } from '../filter';
-import { dedupeBy } from '../utils';
+import { FilterSet, Predicate, SourceFileFilterFn } from '../filter';
+import { dedupeBy, matchRegExpOrGlob } from '../utils';
 import { Dependency, DependencyOrigin } from './dependency';
 import { Member, MemberKind } from './member';
 import { getProjectFileFromSourceFile, ProjectFile } from './project-file';
@@ -10,13 +10,23 @@ import {
   ProjectViewOptions,
 } from './project-view-options';
 
+/** @internal */
 function coerceMemberName(memberOrName: Member | string) {
   return typeof memberOrName === 'string' ? memberOrName : memberOrName.name;
 }
 
+/** @internal */
+function includeProjectFiles(
+  ...pattern: (string | RegExp)[]
+): Predicate<ProjectFile> {
+  return (f) =>
+    !pattern?.length ||
+    pattern.some((p) => matchRegExpOrGlob(p, f.source.fileName));
+}
+
 export class ProjectView {
   private readonly _typeChecker: ts.TypeChecker;
-  private _program: ts.Program;
+  private readonly _program: ts.Program;
   private _files: ProjectFile[];
   private _members: Member[];
 
@@ -33,7 +43,7 @@ export class ProjectView {
     this._program = getProgramFromProjectViewOptions(options);
     this._typeChecker = this._program.getTypeChecker();
 
-    this._files = this._getProjectFiles(options.fileFilter);
+    this._files = this._getProjectFiles(options.sourceFileFilter);
     this._members = this.files.flatMap((f) => f.members);
 
     if (options.memberFilter) {
@@ -97,19 +107,45 @@ export class ProjectView {
     return this.files.find((f) => f.members.includes(member));
   }
 
+  getFilesByPattern(...pattern: (string | RegExp)[]) {
+    return this.files.filter(includeProjectFiles(...pattern));
+  }
+
   hasMember(memberOrName: Member | string) {
     const memberName = coerceMemberName(memberOrName);
     return this.members.some((m) => m.name === memberName);
   }
 
-  getExportedMembersOfFile(file: ProjectFile) {
-    const fileSymbol = this._typeChecker.getSymbolAtLocation(file.source);
-    if (!fileSymbol) return;
-
-    return this._typeChecker
-      .getExportsOfModule(fileSymbol)
-      .map((s) => this.getMemberByName(s.name))
-      .filter(Boolean) as Member[];
+  getExportedMembersOfFile(
+    ...filesOrPatterns: (string | RegExp | ProjectFile)[]
+  ) {
+    return (
+      filesOrPatterns
+        .flatMap((fileOrPattern) => {
+          // firstly we need to identify whether we are dealing with a file or a pattern
+          const isPattern =
+            typeof fileOrPattern === 'string' ||
+            fileOrPattern instanceof RegExp;
+          // and act accordingly to only handle project files in the next step
+          return isPattern
+            ? this.getFilesByPattern(fileOrPattern)
+            : [fileOrPattern];
+        })
+        .flatMap((file) => {
+          const fileSymbol = this._typeChecker.getSymbolAtLocation(file.source);
+          if (!fileSymbol) return;
+          // secondly we are using the files to receive a symbol and from the symbol
+          // onwards the actually exported symbol of that file "symbol". We then map
+          // the exported "symbols" to their according member within the project view
+          return this._typeChecker
+            .getExportsOfModule(fileSymbol)
+            .map((s) => this.getMemberByName(s.name))
+            .filter(Boolean) as Member[];
+        })
+        // finally we dedupe the members since we cannot be sure whether there are
+        // multiple occurrences due to the nature of the method signature
+        .filter(dedupeBy((m) => m!.name)) as Member[]
+    );
   }
 
   getProgram(): ts.Program {

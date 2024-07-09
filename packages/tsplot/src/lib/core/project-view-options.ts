@@ -4,7 +4,7 @@ import { getParsedCommandLine } from '../utils';
 
 /** @internal */
 interface ProjectViewOptionsBase {
-  fileFilter?: SourceFileFilterFn[];
+  sourceFileFilter?: SourceFileFilterFn[];
   memberFilter?: MemberFilterFn[];
 }
 

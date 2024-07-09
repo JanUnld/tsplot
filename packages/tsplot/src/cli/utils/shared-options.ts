@@ -9,11 +9,11 @@ import { MemberKind, ProjectView } from '../../lib/core';
 import {
   excludeDecoratedBy,
   excludeMemberKindOf,
-  excludeMemberNamespace,
+  excludeMemberName,
   excludeSourceFiles,
   includeDecoratedBy,
   includeMemberKindOf,
-  includeMemberNamespace,
+  includeMemberName,
   includeSourceFiles,
   MemberFilterFn,
   SourceFileFilterFn,
@@ -199,7 +199,7 @@ export function getProjectView(options: SharedOptions): ProjectView {
   const tsConfigPath = getTsConfigPath(options);
   const projectView = new ProjectView({
     tsConfigPath,
-    fileFilter: [
+    sourceFileFilter: [
       isRelevantSourceFile,
       includeSourceFiles(...(options.include ?? [])),
       excludeSourceFiles(...(options.exclude ?? [])),
@@ -245,12 +245,8 @@ export function getProjectView(options: SharedOptions): ProjectView {
     ),
     includeDecoratedBy(...(options.includeDecoratedBy ?? [])),
     excludeDecoratedBy(...(options.excludeDecoratedBy ?? [])),
-    includeMemberNamespace(
-      ...(options.includeName ?? options.includeNames ?? [])
-    ),
-    excludeMemberNamespace(
-      ...(options.excludeName ?? options.excludeNames ?? [])
-    )
+    includeMemberName(...(options.includeName ?? options.includeNames ?? [])),
+    excludeMemberName(...(options.excludeName ?? options.excludeNames ?? []))
   );
 
   return projectView;
@@ -284,7 +280,7 @@ export async function getConfinedProjectViewFromMemberOrDefault(
 
   return new ProjectView({
     program: projectView.getProgram(),
-    fileFilter: [isConfinedMemberSourceFile],
+    sourceFileFilter: [isConfinedMemberSourceFile],
     memberFilter: [isConfinedMember, ...projectView.filter.decompose()],
   });
 }

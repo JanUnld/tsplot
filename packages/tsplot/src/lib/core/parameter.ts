@@ -22,6 +22,8 @@ export function getParamsFromNode(
   node: ts.Node,
   typeChecker: ts.TypeChecker
 ): Parameter[] {
+  if (!ts.isFunctionLike(node)) return [];
+
   return query(
     node,
     pipeSelector('Parameter', [
