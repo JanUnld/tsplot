@@ -1,8 +1,8 @@
 import { Command, Option } from 'commander';
 import { consola } from 'consola';
 import {
-  BuiltInTemplate,
-  BuiltInTemplateTarget,
+  KnownTarget,
+  KnownTemplate,
   ProjectView,
   render as _render,
 } from '../../lib';
@@ -19,7 +19,7 @@ import {
 } from '../utils';
 
 export interface RenderOptions extends SharedOptions {
-  target: BuiltInTemplateTarget | string;
+  target: KnownTarget | string;
   baseDir?: string;
   // todo: fields; // filter
   // todo: methods; // filter
@@ -46,13 +46,13 @@ export function setupRenderCommand(program: Command) {
         new Option(
           '-t, --target <name>',
           'the rendering output target'
-        ).default(BuiltInTemplateTarget.PlantUML)
+        ).default(KnownTarget.PlantUML)
       )
   ).action(render);
 }
 
 export async function render(
-  template: BuiltInTemplate | string,
+  template: KnownTemplate | string,
   options: RenderOptions
 ) {
   setupConsola(options);

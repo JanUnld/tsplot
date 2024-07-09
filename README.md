@@ -1,12 +1,9 @@
 # tsplot
 
-This project aims to provide a simple-to-use tool to automagically generate different
-types of diagrams and other templates for TypeScript projects by analyzing the dependencies between files
-and their members, while also resolving relevant type information.
+This project aims to provide a simple-to-use tool to automagically generate different types of diagrams and other templates for TypeScript projects by analyzing the dependencies between files and their members, while also resolving relevant type information.
 
 > [!WARNING]  
-> This project is still in its early stages. Since most of the codebase is currently
-> experimental, major changes shall be expected to happen!
+> This project is still in its early stages. Since most of the codebase is currently experimental, major changes shall be expected to happen!
 
 ## Usage
 
@@ -15,8 +12,7 @@ npx tsplot --help
 ```
 
 > [!NOTE]  
-> Make sure to take a look at the `--help` output of the subcommands as well, to get
-> a full overview of the available options.
+> Make sure to take a look at the `--help` output of the subcommands as well, to get a full overview of the available options.
 
 ```
 Usage: tsplot [options] [command]
@@ -39,7 +35,7 @@ There are currently two template targets available:
 - [`plant-uml`](https://plantuml.com/)
 - [`mermaid`](https://mermaid-js.github.io/mermaid/#/)
 
-They can be set using the `--target [name]` option when using the `render` command.
+They can be set using the `--target` option when using the `render` command.
 
 ### Custom templates
 

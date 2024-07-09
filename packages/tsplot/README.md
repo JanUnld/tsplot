@@ -1,8 +1,6 @@
 # tsplot
 
-This project aims to provide a simple-to-use tool to automagically generate different
-types of diagrams for TypeScript projects by analyzing the dependencies between files
-and their members.
+This project aims to provide a simple-to-use tool to automagically generate different types of diagrams for TypeScript projects by analyzing the dependencies between files and their members.
 
 ## Usage
 

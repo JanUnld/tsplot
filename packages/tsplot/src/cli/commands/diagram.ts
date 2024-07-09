@@ -1,7 +1,7 @@
 import { Command, Option } from 'commander';
 import { consola } from 'consola';
 import {
-  BuiltInTemplateTarget,
+  KnownTarget,
   Member,
   MermaidClassDiagram,
   PlantUMLClassDiagram,
@@ -22,7 +22,7 @@ import {
 /** @deprecated */
 export interface DiagramOptions extends SharedOptions {
   edgeless?: boolean;
-  renderer?: BuiltInTemplateTarget;
+  renderer?: KnownTarget;
   fields?: boolean;
   methods?: boolean;
   // type: string; // Diagram type

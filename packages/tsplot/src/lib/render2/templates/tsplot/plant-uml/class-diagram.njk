@@ -1,14 +1,14 @@
-{% extends 'plant-uml/base.njk' -%}
+{% extends 'tsplot/plant-uml/base.njk' -%}
 
 {% block content %}
   {% for member in projectGraph.members %}
     {% block member %}
-      {% include 'plant-uml/member.njk' %}
+      {% include 'tsplot/plant-uml/member.njk' %}
     {% endblock %}
   {% endfor %}
   {% for edge in projectGraph.edges %}
     {% block edge %}
-      {% include 'common/edge.njk' %}
+      {% include 'tsplot/common/edge.njk' %}
     {% endblock %}
   {% endfor %}
 {% endblock %}
