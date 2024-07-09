@@ -3,7 +3,6 @@ import {
   getModifierFlagsFromNode,
   getNodesBySelectors,
   getTypeInfoFromNode,
-  removeIdentifierFromSelector,
   ResolvedNode,
   ReturnTypeInfo,
   tryGetReturnTypeFromNode,
@@ -81,9 +80,8 @@ export function getMembersFromSourceFile(
   ];
 
   return getNodesBySelectors(source, selectors).map(
-    ({ selector, node }) =>
+    ({ node }) =>
       ({
-        selector: removeIdentifierFromSelector(selector),
         node: node.parent,
         name: node.getText(),
         kind: getMemberKindFromSyntaxKind(node.parent.kind)!,

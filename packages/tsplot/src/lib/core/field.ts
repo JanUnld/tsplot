@@ -7,10 +7,7 @@ import {
   getModifierFlagsFromNode,
   getNodesBySelectors,
   getTypeInfoFromNode,
-  pipeSelector,
   prependDeclToSelector,
-  removeDeclFromSelector,
-  removeIdentifierFromSelector,
   ResolvedNode,
   TypeInfo,
 } from '../utils';
@@ -35,12 +32,8 @@ export function getFieldsFromNode(
     prependDeclToSelector,
     appendIdentifierToSelector,
   ])
-    .map(({ selector, node }) => {
+    .map(({ node }) => {
       return {
-        selector: pipeSelector(selector, [
-          removeDeclFromSelector,
-          removeIdentifierFromSelector,
-        ]),
         node: node.parent,
         name: node.getText(),
         ...getTypeInfoFromNode(node.parent, typeChecker),

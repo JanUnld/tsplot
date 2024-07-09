@@ -6,7 +6,7 @@ import * as ts from 'typescript';
  * @internal
  */
 export interface ResolvedNode {
-  selector: string;
+  // selector: string;
   node: ts.Node;
 }
 
@@ -43,7 +43,5 @@ export function getNodesBySelectors(
 ): ResolvedNode[] {
   return selectors
     .map((selector) => pipeSelector(selector, operators))
-    .flatMap((selector) =>
-      query(node, selector).map((node) => ({ selector, node }))
-    );
+    .flatMap((selector) => query(node, selector).map((node) => ({ node })));
 }
