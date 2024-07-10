@@ -1,10 +1,11 @@
 {% extends 'tsplot/plant-uml/member/interface.njk' %}
 {% set forceBrackets = true %}
+
 {% block content %}
-  {{- '__ Type __' | indent(4, true) + '\n' }}
+  {{- '__ Type __' | indent(baseIndentSize + indentSize, true) + '\n' }}
   {{- member.typeToString({ format: ts.TypeFormatFlags.NodeBuilderFlagsMask })
   | replace('\'', '"')
   | replace('}', ' }')
   | replace('    ', ' ')
-  | indent(4, true) }}
+  | indent(baseIndentSize + indentSize, true) }}
 {% endblock %}

@@ -14,6 +14,15 @@ export enum KnownTarget {
   Mermaid = 'mermaid',
 }
 
+/** @internal */
+function isKnownTemplate(template: string): template is KnownTemplate {
+  return Object.values(KnownTemplate).includes(template as KnownTemplate);
+}
+/** @internal */
+function isKnownTarget(target: string): target is KnownTarget {
+  return Object.values(KnownTarget).includes(target as KnownTarget);
+}
+
 /** Options and flexible {@link TemplateContext} for rendering  */
 export interface RenderOptions {
   /**
@@ -60,11 +69,11 @@ export interface RenderOptions {
  * Custom templates **do not** require to be a declarative diagram dialect (e.g.
  * plant-uml). It can also be any other desired output format (ex. markdown)
  *
- * @param template Either a {@link KnownTemplate} or custom template name
+ * @param templateName Either a {@link KnownTemplate} or custom template name
  * @param options Required and other {@link RenderOptions}
  */
 export function render(
-  template: KnownTemplate | string,
+  templateName: KnownTemplate | string,
   options: RenderOptions
 ) {
   const {
@@ -77,8 +86,19 @@ export function render(
     renderer.setBaseDir(baseDir);
   }
 
-  return renderer.render(`${target}/${template}.njk`, {
+  let templatePath = `${target}/${templateName}.njk`;
+
+  if (
+    isKnownTemplate(templateName) &&
+    isKnownTarget(target) &&
+    !renderer.canRender(templatePath)
+  ) {
+    templatePath = `tsplot/${templatePath}`;
+  }
+
+  return renderer.render(templatePath, {
     projectGraph: ProjectGraph.fromView(options.context.projectView),
+    indentSize: 4,
     ...options.context,
   });
 }

@@ -1,8 +1,13 @@
 {% extends 'tsplot/plant-uml/base.njk' -%}
 
 {% block content %}
-  {% for member in projectGraph.members %}
-    {% block member %}
+  {% for namespace in projectView.namespaces %}
+    {% block namespace %}
+      {% include 'tsplot/plant-uml/namespace.njk' %}
+    {% endblock %}
+  {% endfor %}
+  {% for member in projectView.orphans %}
+    {% block orphan %}
       {% include 'tsplot/plant-uml/member.njk' %}
     {% endblock %}
   {% endfor %}

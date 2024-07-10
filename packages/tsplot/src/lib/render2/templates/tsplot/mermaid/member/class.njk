@@ -1,18 +1,19 @@
 {% set annotation = mermaid.annotation(member) %}
 {% set brackets = forceBrackets or member.fields.length or member.methods.length or annotation.length -%}
+{% set baseIndentSize = baseIndentSize or 0 -%}
 
-{{ 'class' | indent(4, true) }} {{ member.name }} {{ '{' if brackets }}
+{{ 'class' | indent(baseIndentSize + indentSize, true) }} {{ member.name }} {{ '{' if brackets }}
 {% block content %}
-  {{- (annotation | indent(8, true) + '\n') if annotation.length -}}
+  {{- (annotation | indent(baseIndentSize + indentSize * 2, true) + '\n') if annotation.length -}}
   {% block fields %}
     {% for f in member.fields %}
-      {{- mermaid.field(f) | indent(8, true) }}
+      {{- mermaid.field(f) | indent(baseIndentSize + indentSize * 2, true) }}
     {% endfor %}
   {% endblock %}
   {% block methods %}
     {% for m in member.methods %}
-      {{- mermaid.signature(m) | indent(8, true) }}
+      {{- mermaid.signature(m) | indent(baseIndentSize + indentSize * 2, true) }}
     {% endfor %}
   {% endblock %}
 {% endblock %}
-{{- '}' | indent(4, true) if brackets }}
+{{- '}' | indent(baseIndentSize + indentSize, true) if brackets }}

@@ -27,7 +27,7 @@ const puml = render(KnownTemplate.ClassDiagram, {
 Templates can be customized quite easily either by overwriting or extending already existing templates. The following is an example of how to extend the class-diagram template:
 
 ```nunjucks
-{# .tsplot/templates/plant-uml/class-diagram.njk #}
+{# templates/plant-uml/class-diagram.njk #}
 {% extends 'tsplot/puml/class-diagram.njk' %}
 
 {% block member %}

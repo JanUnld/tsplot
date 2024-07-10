@@ -1,11 +1,17 @@
 import * as ts from 'typescript';
 import { MemberFilterFn, SourceFileFilterFn } from '../filter';
-import { getParsedCommandLine } from '../utils';
+import { getParsedCommandLine, PathsLike } from '../utils';
 
 /** @internal */
 interface ProjectViewOptionsBase {
   sourceFileFilter?: SourceFileFilterFn[];
   memberFilter?: MemberFilterFn[];
+  /**
+   * Allows to manually override namespace aggregation using {@link ts.CompilerOptions.paths}.
+   * This also has an impact on the identification of orphaned members, any member
+   * that is not part of any namespace will be considered an orphan.
+   */
+  paths?: PathsLike;
 }
 
 export interface ProjectViewOptionsWithFiles extends ProjectViewOptionsBase {

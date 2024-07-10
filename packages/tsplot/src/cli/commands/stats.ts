@@ -1,5 +1,4 @@
 import { Command } from 'commander';
-import { getEdges, includeMemberKindOf, MemberKind } from '../../lib';
 import {
   logSharedOptions,
   output,
@@ -33,7 +32,7 @@ export function setupStatsCommand(program: Command) {
         false
       )
       .option(
-        '--minLinesOfCode',
+        '--minLinesOfCode <number>',
         'minimum number of lines of code to be included',
         (value) => parseInt(value, 10),
         500

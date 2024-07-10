@@ -1,7 +1,19 @@
 import { query } from '@phenomnomnominal/tsquery';
 import * as ts from 'typescript';
-import { FilterSet, Predicate, SourceFileFilterFn } from '../filter';
-import { dedupeBy, matchRegExpOrGlob } from '../utils';
+import {
+  excludeNonExported,
+  FilterSet,
+  Predicate,
+  SourceFileFilterFn,
+} from '../filter';
+import {
+  dedupeBy,
+  getOrphanMembersFromProjectView,
+  getPathsWithMembersFromProjectView,
+  matchRegExpOrGlob,
+  Namespace,
+  PathsLike,
+} from '../utils';
 import { Dependency, DependencyOrigin } from './dependency';
 import { Member, MemberKind } from './member';
 import { getProjectFileFromSourceFile, ProjectFile } from './project-file';
@@ -27,10 +39,12 @@ function includeProjectFiles(
 export class ProjectView {
   private readonly _typeChecker: ts.TypeChecker;
   private readonly _program: ts.Program;
-  private _files: ProjectFile[];
-  private _members: Member[];
+  private _namespaces: Namespace[] = [];
+  private _files: ProjectFile[] = [];
+  private _members: Member[] = [];
+  private _orphans: Member[] = [];
 
-  readonly filter = new FilterSet<Member>();
+  readonly filter = new FilterSet<Member>([excludeNonExported()]);
 
   get files(): ProjectFile[] {
     return this._files;
@@ -39,16 +53,23 @@ export class ProjectView {
     return this.filter.apply(this._members);
   }
 
+  get orphans(): Member[] {
+    return this._orphans;
+  }
+  get namespaces(): Namespace[] {
+    return this._namespaces;
+  }
+
   constructor(options: ProjectViewOptions) {
     this._program = getProgramFromProjectViewOptions(options);
     this._typeChecker = this._program.getTypeChecker();
 
-    this._files = this._getProjectFiles(options.sourceFileFilter);
-    this._members = this.files.flatMap((f) => f.members);
-
     if (options.memberFilter) {
       this.filter.add(...options.memberFilter);
     }
+
+    this._initProjectFilesAndMembers(options.sourceFileFilter);
+    this._initNamespacesAndOrphans(options.paths);
   }
 
   async getDependencyMembers(member: Member, options?: { depth?: number }) {
@@ -119,54 +140,69 @@ export class ProjectView {
   getExportedMembersOfFile(
     ...filesOrPatterns: (string | RegExp | ProjectFile)[]
   ) {
-    return (
-      filesOrPatterns
-        .flatMap((fileOrPattern) => {
-          // firstly we need to identify whether we are dealing with a file or a pattern
-          const isPattern =
-            typeof fileOrPattern === 'string' ||
-            fileOrPattern instanceof RegExp;
-          // and act accordingly to only handle project files in the next step
-          return isPattern
-            ? this.getFilesByPattern(fileOrPattern)
-            : [fileOrPattern];
-        })
-        .flatMap((file) => {
-          const fileSymbol = this._typeChecker.getSymbolAtLocation(file.source);
-          if (!fileSymbol) return;
-          // secondly we are using the files to receive a symbol and from the symbol
-          // onwards the actually exported symbol of that file "symbol". We then map
-          // the exported "symbols" to their according member within the project view
-          return this._typeChecker
-            .getExportsOfModule(fileSymbol)
-            .map((s) => this.getMemberByName(s.name))
-            .filter(Boolean) as Member[];
-        })
-        // finally we dedupe the members since we cannot be sure whether there are
-        // multiple occurrences due to the nature of the method signature
-        .filter(dedupeBy((m) => m!.name)) as Member[]
-    );
+    const exportedMembers = filesOrPatterns
+      .flatMap((fileOrPattern) => {
+        // firstly we need to identify whether we are dealing with a file or a pattern
+        const isPattern =
+          typeof fileOrPattern === 'string' || fileOrPattern instanceof RegExp;
+        // and act accordingly to only handle project files in the next step
+        return isPattern
+          ? this.getFilesByPattern(fileOrPattern)
+          : [fileOrPattern];
+      })
+      .flatMap((file) => {
+        const fileSymbol = this._typeChecker.getSymbolAtLocation(file.source);
+        if (!fileSymbol) return;
+        // secondly we are using the files to receive a symbol and from the symbol
+        // onwards the actually exported symbol of that file "symbol". We then map
+        // the exported "symbols" to their according member within the project view
+        return this._typeChecker
+          .getExportsOfModule(fileSymbol)
+          .map((s) => this.getMemberByName(s.name))
+          .filter(Boolean) as Member[];
+      })
+      // finally we dedupe the members since we cannot be sure whether there are
+      // multiple occurrences due to the nature of the method signature
+      .filter(dedupeBy((m) => m!.name)) as Member[];
+
+    return this.filter.apply(exportedMembers);
   }
 
   getProgram(): ts.Program {
     return this._program;
   }
 
-  private _getProjectFiles(filters?: SourceFileFilterFn[]): ProjectFile[] {
+  private _initProjectFilesAndMembers(filters?: SourceFileFilterFn[]) {
+    const toMembers = (f: ProjectFile) => f.members;
     const files = FilterSet.with(filters ?? [])
       .apply(this._program.getSourceFiles() as ts.SourceFile[])
       .map((s) => getProjectFileFromSourceFile(s, this._typeChecker));
 
     this._files = files;
-    this._members = files.flatMap((f) => f.members);
+    this._members = files.flatMap(toMembers);
 
-    return files.map((file) => ({
+    this._files = files.map((file) => ({
       ...file,
       members: file.members.map((member) => ({
         ...member,
         deps: this._getDirectDeps(member),
       })),
     }));
+    this._members = this._files.flatMap(toMembers);
+  }
+
+  private _initNamespacesAndOrphans(paths?: PathsLike) {
+    paths = paths ?? this.getProgram().getCompilerOptions().paths ?? {};
+
+    const pathsWithMembers = getPathsWithMembersFromProjectView(this, paths);
+
+    this._orphans = getOrphanMembersFromProjectView(this, pathsWithMembers);
+    this._namespaces = Object.entries(pathsWithMembers).map(
+      ([path, members]) => ({
+        path,
+        members,
+      })
+    );
   }
 
   private _getDirectDeps(member: Member): Dependency[] {

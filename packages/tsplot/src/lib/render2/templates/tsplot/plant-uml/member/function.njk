@@ -1,7 +1,8 @@
 {% extends 'tsplot/plant-uml/member/interface.njk' %}
 {% set kind = 'protocol' %}
 {% set forceBrackets = true %}
+
 {% block content %}
-  {{- '__ Function __'  | indent(4, true) + '\n' }}
-  {{- member.typeToString()  | indent(4, true) }}
+  {{- '__ Function __'  | indent(baseIndentSize + indentSize, true) + '\n' }}
+  {{- member.typeToString()  | indent(baseIndentSize + indentSize, true) }}
 {% endblock %}

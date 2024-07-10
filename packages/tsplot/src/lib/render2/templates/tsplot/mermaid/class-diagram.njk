@@ -1,15 +1,20 @@
-{% extends 'mermaid/base.njk' -%}
+{% extends 'tsplot/mermaid/base.njk' -%}
 {% set diagramType = 'classDiagram' -%}
 
 {% block content %}
-  {% for member in projectGraph.members %}
-    {% block member %}
-      {% include 'mermaid/member.njk' %}
+  {% for namespace in projectView.namespaces %}
+    {% block namespace %}
+      {% include 'tsplot/mermaid/namespace.njk' %}
+    {% endblock %}
+  {% endfor %}
+  {% for member in projectView.orphans %}
+    {% block orphan %}
+      {% include 'tsplot/mermaid/member.njk' %}
     {% endblock %}
   {% endfor %}
   {% for edge in projectGraph.edges %}
     {% block edge %}
-      {% include 'mermaid/edge.njk' %}
+      {% include 'tsplot/mermaid/edge.njk' %}
     {% endblock %}
   {% endfor %}
 {% endblock %}

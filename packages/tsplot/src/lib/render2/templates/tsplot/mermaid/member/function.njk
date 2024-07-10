@@ -1,5 +1,5 @@
-{% extends 'mermaid/member/class.njk' %}
+{% extends 'tsplot/mermaid/member/class.njk' %}
 {% set forceBrackets = true %}
 {% block content %}
-  {{- mermaid.signature(member) | indent(8, true) }}
+  {{- mermaid.signature(member) | indent(baseIndentSize + indentSize * 2, true) }}
 {% endblock %}

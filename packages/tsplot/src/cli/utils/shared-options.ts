@@ -204,6 +204,18 @@ export function getProjectView(options: SharedOptions): ProjectView {
       includeSourceFiles(...(options.include ?? [])),
       excludeSourceFiles(...(options.exclude ?? [])),
     ],
+    memberFilter: [
+      includeMemberKindOf(
+        ...((options.includeKind ?? options.includeTypes ?? []) as MemberKind[])
+      ),
+      excludeMemberKindOf(
+        ...((options.excludeKind ?? options.excludeTypes ?? []) as MemberKind[])
+      ),
+      includeDecoratedBy(...(options.includeDecoratedBy ?? [])),
+      excludeDecoratedBy(...(options.excludeDecoratedBy ?? [])),
+      includeMemberName(...(options.includeName ?? options.includeNames ?? [])),
+      excludeMemberName(...(options.excludeName ?? options.excludeNames ?? [])),
+    ],
   });
 
   const isPartialView = [
@@ -235,19 +247,6 @@ export function getProjectView(options: SharedOptions): ProjectView {
     consola.warn(
       'the "split" option is ignored because the "from" option is not set'
     );
-
-  projectView.filter.add(
-    includeMemberKindOf(
-      ...((options.includeKind ?? options.includeTypes ?? []) as MemberKind[])
-    ),
-    excludeMemberKindOf(
-      ...((options.excludeKind ?? options.excludeTypes ?? []) as MemberKind[])
-    ),
-    includeDecoratedBy(...(options.includeDecoratedBy ?? [])),
-    excludeDecoratedBy(...(options.excludeDecoratedBy ?? [])),
-    includeMemberName(...(options.includeName ?? options.includeNames ?? [])),
-    excludeMemberName(...(options.excludeName ?? options.excludeNames ?? []))
-  );
 
   return projectView;
 }
