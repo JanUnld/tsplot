@@ -1,0 +1,9 @@
+{% set baseIndentSize = indentSize -%}
+
+package {{ namespace.path }} {
+{% for member in namespace.members %}
+  {% block member %}
+    {% include 'tsplot/plant-uml/member.njk' %}
+  {% endblock %}
+{% endfor %}
+}
