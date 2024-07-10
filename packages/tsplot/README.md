@@ -29,7 +29,7 @@ There are currently two template targets available:
 - [`plant-uml`](https://plantuml.com/)
 - [`mermaid`](https://mermaid-js.github.io/mermaid/#/)
 
-They can be set using the `--target [name]` option when using the `render` command.
+They can be set using the `--target` option when using the `render` command.
 
 ### Custom templates
 
@@ -46,10 +46,10 @@ npx tsplot render class-diagram \
   --exclude '**/cli/**'
 ```
 
-Generates the Plant UML code in [`example.puml`](./examples/example.puml), which results in the following diagram:
+Generates the Plant UML code in [`example.puml`](./assets/puml/example.puml), which results in the following diagram:
 
-![example](./examples/example.svg)
+![example](./assets/svg/example.svg)
 
 A _full_ overview of this project looks like this:
 
-![tsplot](./examples/tsplot.svg)
+![tsplot](./assets/svg/tsplot.svg)

@@ -1,7 +1,13 @@
 {% set brackets = forceBrackets or member.fields.length or member.methods.length %}
 {% set baseIndentSize = baseIndentSize or 0 %}
+{% set kind = kind or 'interface' %}
 
-{{- (kind or 'interface') | indent(baseIndentSize, true) }} {{ member.name }} {{ plantUml.stereotype(member.decorators) if member.decorators.length -}}
+{%- if baseIndentSize %}
+  {{- kind | indent(baseIndentSize, true) -}}
+{% else %}
+  {{- kind -}}
+{% endif %}
+{{- ' ' + member.name }} {{ plantUml.stereotype(member.decorators) if member.decorators.length -}}
 {{ '{' if brackets }}
 {% block content %}
   {% block fields %}
@@ -15,4 +21,10 @@
     {% endfor %}
   {% endblock %}
 {% endblock %}
-{{ ('}' if brackets) | indent(baseIndentSize, true) }}
+{% if brackets %}
+  {% if baseIndentSize %}
+    {{- '}' | indent(baseIndentSize, true) }}
+  {% else %}
+    {{- '}' if brackets }}
+  {% endif %}
+{% endif %}

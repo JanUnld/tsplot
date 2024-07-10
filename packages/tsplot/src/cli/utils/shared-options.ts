@@ -18,6 +18,7 @@ import {
   MemberFilterFn,
   SourceFileFilterFn,
 } from '../../lib/filter';
+import { PathsLike } from '../../lib/utils';
 import {
   insertBeforeExtension,
   interpolate,
@@ -191,7 +192,9 @@ export function getTsConfigPath(options = program.opts<SharedOptions>()) {
 }
 
 /** @internal */
-export function getProjectView(options: SharedOptions): ProjectView {
+export function getProjectView(
+  options: SharedOptions & { paths?: PathsLike }
+): ProjectView {
   const isRelevantSourceFile = (f: ts.SourceFile) => {
     return !f.isDeclarationFile && !f.fileName.includes('node_modules');
   };
@@ -199,6 +202,7 @@ export function getProjectView(options: SharedOptions): ProjectView {
   const tsConfigPath = getTsConfigPath(options);
   const projectView = new ProjectView({
     tsConfigPath,
+    paths: options?.paths,
     sourceFileFilter: [
       isRelevantSourceFile,
       includeSourceFiles(...(options.include ?? [])),
