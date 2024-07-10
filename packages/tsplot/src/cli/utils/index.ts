@@ -1,3 +1,4 @@
+export * from './key-value-pair';
 export * from './shared-options';
 export * from './lines-of-code';
 export * from './interpolation';

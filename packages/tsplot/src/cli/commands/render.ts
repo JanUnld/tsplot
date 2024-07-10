@@ -9,10 +9,12 @@ import {
 import {
   collectStats,
   getConfinedProjectViewFromMemberOrDefault,
+  getPathsFromKeyValueListPairs,
   getProjectView,
   interpolateOutputPath,
   logSharedOptions,
   output,
+  parseKeyValueListPair,
   setupConsola,
   setupSharedOptions,
   SharedOptions,
@@ -21,6 +23,7 @@ import {
 export interface RenderOptions extends SharedOptions {
   target: KnownTarget | string;
   baseDir?: string;
+  groupBy?: string[];
   // todo: fields; // filter
   // todo: methods; // filter
 }
@@ -30,22 +33,29 @@ export function setupRenderCommand(program: Command) {
   return setupSharedOptions(
     program
       .command('render')
-      .argument(
-        '<template>',
-        'the template name that shall be rendered as output (e.g. class-diagram)'
-      )
       .description(
         'renders typescript AST and type checker information to a desired target ' +
           'format using built-in and custom templates (e.g. plant-uml, mermaid)'
+      )
+      .argument(
+        '<template>',
+        'the template name that shall be rendered as output (e.g. class-diagram)'
       )
       .option(
         '--baseDir <path>',
         'custom base directory to use for template file resolution'
       )
+      .option(
+        '--groupBy <namespace:glob...>',
+        'grouping specification to use for namespacing members. Can be a list of ' +
+          'custom specifiers in the format `namespace:glob` or `namespace:glob,glob`. ' +
+          'If not defined, will use paths definitions in the tsconfig.json file'
+      )
       .addOption(
         new Option(
           '-t, --target <name>',
-          'the rendering output target'
+          'the rendering output target. Can be a custom one or one of the built-in ' +
+            `targets (${Object.values(KnownTarget).join(', ')})`
         ).default(KnownTarget.PlantUML)
       )
   ).action(render);
@@ -58,7 +68,13 @@ export async function render(
   setupConsola(options);
   logSharedOptions(options);
 
-  const view = getProjectView(options);
+  const paths = options.groupBy?.length
+    ? getPathsFromKeyValueListPairs(options.groupBy.map(parseKeyValueListPair))
+    : undefined;
+  const view = getProjectView({
+    ...options,
+    paths,
+  });
   const renderView = (projectView: ProjectView) =>
     _render(template, {
       baseDir: options.baseDir,
