@@ -21,8 +21,8 @@ export function matchRegExpOrStr(pattern: RegExp | string, str: string) {
 }
 
 /** @internal */
-export function matchRegExpOrGlob(pattern: RegExp | string, path: string) {
-  return matchRegExpOr(path, {
+export function matchRegExpOrGlob(pattern: RegExp | string, str: string) {
+  return matchRegExpOr(str, {
     pattern,
     or: (str) => minimatch(str, pattern as string, { matchBase: true }),
   });

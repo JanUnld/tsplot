@@ -66,6 +66,7 @@ export interface Member
   isAbstract: boolean;
 }
 
+/** @internal */
 export function getMembersFromSourceFile(
   source: ts.SourceFile,
   typeChecker: ts.TypeChecker
@@ -97,4 +98,9 @@ export function getMembersFromSourceFile(
         deps: [] as Dependency[],
       } as Member)
   );
+}
+
+/** @internal */
+export function getMemberUniqueId(member: Member) {
+  return `${member.node.getSourceFile().fileName}#${member.name}`;
 }

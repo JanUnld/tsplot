@@ -6,6 +6,7 @@ import {
   ProjectView,
   render as _render,
 } from '../../lib';
+import { getParsedCommandLine, PathsLike } from '../../lib/utils';
 import {
   collectStats,
   getConfinedProjectViewFromMemberOrDefault,
@@ -19,6 +20,8 @@ import {
   setupSharedOptions,
   SharedOptions,
 } from '../utils';
+
+const GROUP_BY_TS_PATHS = 'tsPaths';
 
 export interface RenderOptions extends SharedOptions {
   target: KnownTarget | string;
@@ -61,6 +64,28 @@ export function setupRenderCommand(program: Command) {
   ).action(render);
 }
 
+function getPaths(options: RenderOptions) {
+  let { groupBy } = options;
+  const useTsPaths = groupBy?.includes(GROUP_BY_TS_PATHS);
+
+  if (useTsPaths) {
+    groupBy = groupBy?.filter((str) => str !== GROUP_BY_TS_PATHS);
+  }
+
+  let paths: PathsLike = groupBy?.length
+    ? getPathsFromKeyValueListPairs(groupBy.map(parseKeyValueListPair))
+    : {};
+
+  if (useTsPaths) {
+    paths = {
+      ...getParsedCommandLine(options.project).options.paths,
+      ...paths,
+    };
+  }
+
+  return paths;
+}
+
 export async function render(
   template: KnownTemplate | string,
   options: RenderOptions
@@ -68,13 +93,11 @@ export async function render(
   setupConsola(options);
   logSharedOptions(options);
 
-  const paths = options.groupBy?.length
-    ? getPathsFromKeyValueListPairs(options.groupBy.map(parseKeyValueListPair))
-    : undefined;
   const view = getProjectView({
     ...options,
-    paths,
+    paths: getPaths(options),
   });
+
   const renderView = (projectView: ProjectView) =>
     _render(template, {
       baseDir: options.baseDir,
