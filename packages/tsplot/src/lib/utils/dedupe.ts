@@ -1,3 +1,5 @@
+import { getMemberUniqueId, Member } from '../core';
+
 /** @internal */
 export function dedupe<T>(it: T, index: number, arr: T[]): boolean {
   return arr.indexOf(it) === index;
@@ -9,3 +11,8 @@ export function dedupeBy<T>(selector: (it: T) => any) {
     return arr.findIndex((other) => selector(it) === selector(other)) === index;
   };
 }
+
+/** @internal */
+export const dedupeByMemberUniqueId = dedupeBy<Member>((m) =>
+  getMemberUniqueId(m)
+);

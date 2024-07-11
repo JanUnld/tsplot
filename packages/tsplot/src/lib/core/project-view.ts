@@ -8,6 +8,7 @@ import {
 } from '../filter';
 import {
   dedupeBy,
+  dedupeByMemberUniqueId,
   getOrphanMembersFromProjectView,
   getPathsWithMembersFromProjectView,
   matchRegExpOrGlob,
@@ -88,7 +89,7 @@ export class ProjectView {
         (m2) => ![m.name, m2.name].includes(member.name)
       );
 
-      deps = [...members, ...deps].filter(dedupeBy((m) => m.name));
+      deps = [...members, ...deps].filter(dedupeByMemberUniqueId);
     }
 
     return deps.concat(member).filter(this.hasMember.bind(this));
@@ -110,7 +111,7 @@ export class ProjectView {
         (m2) => ![m.name, m2.name].includes(member.name)
       );
 
-      dependents = [...members, ...dependents].filter(dedupeBy((m) => m.name));
+      dependents = [...members, ...dependents].filter(dedupeByMemberUniqueId);
     }
 
     return dependents.concat(member).filter(this.hasMember.bind(this));
@@ -150,9 +151,9 @@ export class ProjectView {
           ? this.getFilesByPattern(fileOrPattern)
           : [fileOrPattern];
       })
-      .flatMap((file) => {
+      .flatMap<Member>((file) => {
         const fileSymbol = this._typeChecker.getSymbolAtLocation(file.source);
-        if (!fileSymbol) return;
+        if (!fileSymbol) return [];
         // secondly we are using the files to receive a symbol and from the symbol
         // onwards the actually exported symbol of that file "symbol". We then map
         // the exported "symbols" to their according member within the project view
@@ -163,7 +164,7 @@ export class ProjectView {
       })
       // finally we dedupe the members since we cannot be sure whether there are
       // multiple occurrences due to the nature of the method signature
-      .filter(dedupeBy((m) => m!.name)) as Member[];
+      .filter(dedupeByMemberUniqueId);
 
     return this.filter.apply(exportedMembers);
   }
