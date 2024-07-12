@@ -5,5 +5,5 @@
 {%- endmacro %}
 
 {% macro edge(edge, connection = '--') -%}
-  {{ edge.from.name }}{{ connection }}{{ edge.to.name }}
+  {{ edge.from.uniqueName }}{{ connection }}{{ edge.to.uniqueName }}
 {%- endmacro %}

@@ -1,6 +1,7 @@
 import * as ts from 'typescript';
 import { MemberFilterFn, SourceFileFilterFn } from '../filter';
-import { getParsedCommandLine, PathsLike } from '../utils';
+import { getParsedCommandLine } from '../utils';
+import { PathsLike } from './namespace';
 
 /** @internal */
 interface ProjectViewOptionsBase {

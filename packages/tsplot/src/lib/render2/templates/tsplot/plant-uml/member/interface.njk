@@ -7,7 +7,7 @@
 {% else %}
   {{- kind -}}
 {% endif %}
-{{- ' ' + member.name }} {{ plantUml.stereotype(member.decorators) if member.decorators.length -}}
+{{- ' ' + member.uniqueName }}{{ (' as "' + member.name + '"') if member.name != member.uniqueName }} {{ plantUml.stereotype(member.decorators) if member.decorators.length -}}
 {{ '{' if brackets }}
 {% block content %}
   {% block fields %}

@@ -6,17 +6,15 @@ import {
   Predicate,
   SourceFileFilterFn,
 } from '../filter';
+import { dedupeBy, dedupeByMemberUniqueId, matchRegExpOrGlob } from '../utils';
+import { Dependency, DependencyOrigin } from './dependency';
+import { getMemberUniqueId, Member, MemberKind } from './member';
 import {
-  dedupeBy,
-  dedupeByMemberUniqueId,
   getOrphanMembersFromProjectView,
   getPathsWithMembersFromProjectView,
-  matchRegExpOrGlob,
   Namespace,
   PathsLike,
-} from '../utils';
-import { Dependency, DependencyOrigin } from './dependency';
-import { Member, MemberKind } from './member';
+} from './namespace';
 import { getProjectFileFromSourceFile, ProjectFile } from './project-file';
 import {
   getProgramFromProjectViewOptions,
@@ -77,7 +75,11 @@ export class ProjectView {
     let depth = options?.depth;
 
     let deps = member.deps
-      .map((d) => this.getMemberByName(d.name))
+      .map((d) =>
+        this.getMemberByName(d.name, {
+          sourceFileName: d.node.getSourceFile().fileName,
+        })
+      )
       .filter(Boolean) as Member[];
 
     if (depth === 0)
@@ -121,8 +123,23 @@ export class ProjectView {
     return this.members.filter((m) => m.kind === kind);
   }
 
-  getMemberByName(name: string) {
-    return this.members.find((m) => m.name === name);
+  getMemberByName(
+    name: string,
+    options?: { sourceFileName?: string | RegExp }
+  ) {
+    return this.members.find((m) => {
+      // checks whether the member is part of the source file if specified
+      const isInSrc =
+        !options?.sourceFileName ||
+        matchRegExpOrGlob(
+          options.sourceFileName,
+          m.node.getSourceFile().fileName
+        );
+
+      // if not specified, we are just looking for the member by name which
+      // will return the first occurrence of the member with the given name
+      return isInSrc && m.name === name;
+    });
   }
 
   getFileOfMember(member: Member) {
@@ -159,7 +176,11 @@ export class ProjectView {
         // the exported "symbols" to their according member within the project view
         return this._typeChecker
           .getExportsOfModule(fileSymbol)
-          .map((s) => this.getMemberByName(s.name))
+          .map((s) =>
+            this.getMemberByName(s.name, {
+              sourceFileName: s.declarations?.[0].getSourceFile().fileName,
+            })
+          )
           .filter(Boolean) as Member[];
       })
       // finally we dedupe the members since we cannot be sure whether there are
@@ -186,6 +207,7 @@ export class ProjectView {
       ...file,
       members: file.members.map((member) => ({
         ...member,
+        uniqueName: this._getUniqueName(member),
         deps: this._getDirectDeps(member),
       })),
     }));
@@ -256,5 +278,15 @@ export class ProjectView {
       .filter((d) => this.hasMember(d.name) && d.name !== member.name)
       .filter((d) => hasMemberFileDependencyImport(member, d))
       .filter(dedupeBy((d) => d.name));
+  }
+
+  private _getUniqueName(member: Member) {
+    const occurrenceIndex = this.members
+      .filter((m) => m.name === member.name)
+      .findIndex((m) => getMemberUniqueId(m) === getMemberUniqueId(member));
+
+    return occurrenceIndex > 0
+      ? `${member.name}_${occurrenceIndex}`
+      : member.name;
   }
 }

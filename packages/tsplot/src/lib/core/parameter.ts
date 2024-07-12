@@ -3,13 +3,12 @@ import * as ts from 'typescript';
 import {
   appendIdentifierToSelector,
   getModifierFlagsFromNode,
-  getTypeInfoFromNode,
   PARAMETER_MODIFIER_FLAGS,
   ParameterModifierFlags,
   pipeSelector,
   prependDeclToSelector,
-  TypeInfo,
 } from '../utils';
+import { getTypeInfoFromNode, TypeInfo } from './type-info';
 
 export interface Parameter
   extends Record<ParameterModifierFlags, boolean>,

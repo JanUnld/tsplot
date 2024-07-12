@@ -2,7 +2,13 @@
 {% set brackets = forceBrackets or member.fields.length or member.methods.length or annotation.length -%}
 {% set baseIndentSize = baseIndentSize or 0 -%}
 
-{{ 'class' | indent(baseIndentSize + indentSize, true) }} {{ member.name }} {{ '{' if brackets }}
+{{ ('class' | indent(baseIndentSize + indentSize, true)) + ' ' -}}
+{% if member.name != member.uniqueName -%}
+  {{- member.uniqueName }}["{{ member.name }}"]
+{%- else -%}
+  {{- member.name }}
+{%- endif %}
+{{- ' {' if brackets }}
 {% block content %}
   {{- (annotation | indent(baseIndentSize + indentSize * 2, true) + '\n') if annotation.length -}}
   {% block fields %}

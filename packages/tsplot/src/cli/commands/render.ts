@@ -3,10 +3,11 @@ import { consola } from 'consola';
 import {
   KnownTarget,
   KnownTemplate,
+  PathsLike,
   ProjectView,
   render as _render,
 } from '../../lib';
-import { getParsedCommandLine, PathsLike } from '../../lib/utils';
+import { getParsedCommandLine } from '../../lib/utils';
 import {
   collectStats,
   getConfinedProjectViewFromMemberOrDefault,

@@ -6,11 +6,10 @@ import {
   dedupeBy,
   getModifierFlagsFromNode,
   getNodesBySelectors,
-  getTypeInfoFromNode,
   prependDeclToSelector,
   ResolvedNode,
-  TypeInfo,
 } from '../utils';
+import { getTypeInfoFromNode, TypeInfo } from './type-info';
 
 export interface Field extends ResolvedNode, AccessModifiers, TypeInfo {
   name: string;

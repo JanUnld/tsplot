@@ -5,7 +5,6 @@ import { EOL } from 'os';
 import { resolve } from 'path';
 import * as process from 'process';
 import * as ts from 'typescript';
-import { MemberKind, ProjectView } from '../../lib/core';
 import {
   excludeDecoratedBy,
   excludeMemberKindOf,
@@ -16,9 +15,11 @@ import {
   includeMemberName,
   includeSourceFiles,
   MemberFilterFn,
+  MemberKind,
+  PathsLike,
+  ProjectView,
   SourceFileFilterFn,
-} from '../../lib/filter';
-import { PathsLike } from '../../lib/utils';
+} from '../../lib';
 import {
   insertBeforeExtension,
   interpolate,

@@ -1,4 +1,4 @@
-import { Member, ProjectView } from '../core';
+import { getMemberUniqueId, Member, ProjectView } from './index';
 
 /** @internal */
 const GLOB_STAR = '**';
@@ -8,7 +8,7 @@ function prependPatternWithGlobStar(pattern: string) {
   return !pattern.startsWith(GLOB_STAR)
     ? // we're replacing any potentially existing leading slash with an empty
       // string since it will be prepended together with the GLOB_START anyway
-      `${GLOB_STAR}/${pattern.replace(/^\//, '')}`
+      `${GLOB_STAR}/${pattern.replace(/^\**\//, '')}`
     : pattern;
 }
 
@@ -34,7 +34,10 @@ export function getOrphanMembersFromProjectView(
   const membersWithNamespace = Object.values(pathsWithMembers).flat();
   return projectView.members.filter(
     // all members that are not part of any namespace are orphans by definition
-    (m) => !membersWithNamespace.find((m2) => m2.name === m.name)
+    (m) =>
+      !membersWithNamespace.find(
+        (m2) => getMemberUniqueId(m2) === getMemberUniqueId(m)
+      )
   );
 }
 
