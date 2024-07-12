@@ -15,6 +15,13 @@
       {{- plantUml.field(f) | indent(baseIndentSize + indentSize, true) }}
     {% endfor %}
   {% endblock %}
+  {% block ctor %}
+    {% if member.ctor %}
+      {{- '__' | indent(baseIndentSize + indentSize, true) + '\n' }}
+      {{- plantUml.signature(member.ctor) | indent(baseIndentSize + indentSize, true) + '\n' }}
+      {{- '__' | indent(baseIndentSize + indentSize, true) }}
+    {% endif %}
+  {% endblock %}
   {% block methods %}
     {% for m in member.methods %}
       {{- plantUml.signature(m) | indent(baseIndentSize + indentSize, true) }}

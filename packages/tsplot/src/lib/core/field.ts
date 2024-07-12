@@ -21,7 +21,6 @@ export function getFieldsFromNode(
 ): Field[] {
   const selectors: string[] = [
     'PropertySignature',
-    'PropertyDeclaration:not(:has(ArrowFunction))',
     'GetAccessor',
     'SetAccessor',
     'EnumMember',

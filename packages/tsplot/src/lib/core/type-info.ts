@@ -46,7 +46,9 @@ export function getReturnTypeInfoFromNode(
   typeChecker: ts.TypeChecker
 ): ReturnTypeInfo {
   if (!ts.isFunctionLike(node)) {
-    throw new Error('Require function-like declaration to get a return type');
+    throw new Error(
+      `Require function-like declaration to get a return type (text: '${node.getText()})'`
+    );
   }
 
   const signature = typeChecker.getSignatureFromDeclaration(node)!;

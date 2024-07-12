@@ -42,12 +42,14 @@ export class ProjectView {
   private _files: ProjectFile[] = [];
   private _members: Member[] = [];
   private _orphans: Member[] = [];
+  private _paths: PathsLike = {};
 
   readonly filter = new FilterSet<Member>([excludeNonExported()]);
 
   get files(): ProjectFile[] {
     return this._files;
   }
+
   get members(): Member[] {
     return this.filter.apply(this._members);
   }
@@ -55,6 +57,7 @@ export class ProjectView {
   get orphans(): Member[] {
     return this._orphans;
   }
+
   get namespaces(): Namespace[] {
     return this._namespaces;
   }
@@ -194,6 +197,10 @@ export class ProjectView {
     return this._program;
   }
 
+  getPaths(): PathsLike {
+    return this._paths;
+  }
+
   private _initProjectFilesAndMembers(filters?: SourceFileFilterFn[]) {
     const toMembers = (f: ProjectFile) => f.members;
     const files = FilterSet.with(filters ?? [])
@@ -216,6 +223,8 @@ export class ProjectView {
 
   private _initNamespacesAndOrphans(paths?: PathsLike) {
     paths = paths ?? this.getProgram().getCompilerOptions().paths ?? {};
+
+    this._paths = paths;
 
     const pathsWithMembers = getPathsWithMembersFromProjectView(this, paths);
 
