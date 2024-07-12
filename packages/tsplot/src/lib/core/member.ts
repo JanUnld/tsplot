@@ -4,6 +4,7 @@ import {
   getNodesBySelectors,
   ResolvedNode,
 } from '../utils';
+import { Constructor, getConstructorFromNode } from './constructor';
 import { Decorator, getDecoratorsFromNode } from './decorator';
 import { Dependency } from './dependency';
 import { Field, getFieldsFromNode } from './field';
@@ -62,6 +63,7 @@ export interface Member
   fields: Field[];
   methods: Method[];
   params: Parameter[];
+  ctor?: Constructor;
   kind: MemberKind;
   name: string;
   uniqueName: string;
@@ -89,6 +91,7 @@ export function getMembersFromSourceFile(
         node: node.parent,
         name: node.getText(),
         kind: getMemberKindFromSyntaxKind(node.parent.kind)!,
+        ctor: getConstructorFromNode(node.parent, typeChecker),
         decorators: getDecoratorsFromNode(node.parent),
         fields: getFieldsFromNode(node.parent, typeChecker),
         methods: getMethodsFromNode(node.parent, typeChecker),

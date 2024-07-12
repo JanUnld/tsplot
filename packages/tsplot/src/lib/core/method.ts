@@ -1,23 +1,15 @@
 import * as ts from 'typescript';
 import {
-  ACCESS_MODIFIER_FLAGS,
   appendIdentifierToSelector,
   dedupeBy,
-  getModifierFlagsFromNode,
   getNodesBySelectors,
   prependDeclToSelector,
 } from '../utils';
 import { Field } from './field';
-import { getParamsFromNode, Parameter } from './parameter';
-import {
-  getReturnTypeInfoFromNode,
-  getTypeInfoFromNode,
-  ReturnTypeInfo,
-} from './type-info';
+import { getSignatureInfoFromNode, SignatureInfo } from './signature-info';
+import { getReturnTypeInfoFromNode, ReturnTypeInfo } from './type-info';
 
-export interface Method extends Field, ReturnTypeInfo {
-  params: Parameter[];
-}
+export interface Method extends SignatureInfo, Field, ReturnTypeInfo {}
 
 export function getMethodsFromNode(
   node: ts.Node,
@@ -26,7 +18,7 @@ export function getMethodsFromNode(
   const selectors: string[] = [
     'MethodSignature',
     'MethodDeclaration',
-    'PropertyDeclaration:has(ArrowFunction)',
+    'Constructor',
   ];
 
   return getNodesBySelectors(node, selectors, [
@@ -37,11 +29,9 @@ export function getMethodsFromNode(
       return {
         node: node.parent,
         name: node.getText(),
-        params: getParamsFromNode(node.parent, typeChecker),
-        ...getModifierFlagsFromNode(node.parent, ACCESS_MODIFIER_FLAGS),
-        ...getTypeInfoFromNode(node.parent, typeChecker),
+        ...getSignatureInfoFromNode(node, typeChecker),
         ...getReturnTypeInfoFromNode(node.parent, typeChecker),
       };
     })
-    .filter(dedupeBy((p) => p.name));
+    .filter(dedupeBy((m) => m.name));
 }

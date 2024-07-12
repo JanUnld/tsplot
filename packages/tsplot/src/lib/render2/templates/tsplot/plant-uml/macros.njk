@@ -14,7 +14,7 @@
 
 {% macro signature(fn) -%}
   {{ access(fn) -}}
-  {{ fn.name }}({{ params(fn.params) }}): {{ fn.returnTypeToString() }}
+  {{ fn.name }}({{ params(fn.params) }}){{ (': ' + fn.returnTypeToString()) if fn.returnTypeToString }}
 {%- endmacro %}
 
 {% macro param(param) -%}

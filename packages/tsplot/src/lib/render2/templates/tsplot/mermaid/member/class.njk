@@ -17,6 +17,9 @@
     {% endfor %}
   {% endblock %}
   {% block methods %}
+    {% if member.ctor %}
+      {{- mermaid.signature(member.ctor) | indent(baseIndentSize + indentSize * 2, true) }}
+    {% endif %}
     {% for m in member.methods %}
       {{- mermaid.signature(m) | indent(baseIndentSize + indentSize * 2, true) }}
     {% endfor %}

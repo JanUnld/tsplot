@@ -286,6 +286,7 @@ export async function getConfinedProjectViewFromMemberOrDefault(
     program: projectView.getProgram(),
     sourceFileFilter: [isConfinedMemberSourceFile],
     memberFilter: [isConfinedMember, ...projectView.filter.decompose()],
+    paths: projectView.getPaths(),
   });
 }
 
