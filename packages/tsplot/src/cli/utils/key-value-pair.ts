@@ -1,4 +1,4 @@
-import { PathsLike } from '../../lib/utils';
+import { PathsLike } from '../../lib';
 import { entriesToObject } from './accumulators';
 
 export type KeyValuePair<T = string> = [string, T];

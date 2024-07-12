@@ -5,13 +5,15 @@ import {
   dedupeBy,
   getModifierFlagsFromNode,
   getNodesBySelectors,
-  getReturnTypeInfoFromNode,
-  getTypeInfoFromNode,
   prependDeclToSelector,
-  ReturnTypeInfo,
 } from '../utils';
 import { Field } from './field';
 import { getParamsFromNode, Parameter } from './parameter';
+import {
+  getReturnTypeInfoFromNode,
+  getTypeInfoFromNode,
+  ReturnTypeInfo,
+} from './type-info';
 
 export interface Method extends Field, ReturnTypeInfo {
   params: Parameter[];

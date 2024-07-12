@@ -1,6 +1,4 @@
 export * from './modifier-flags';
-export * from './namespace';
-export * from './type-info';
 export * from './tsconfig';
 export * from './selector';
 export * from './comment';

@@ -10,6 +10,9 @@ import {
 const INTERNAL_NJK_TEMPLATE_DIR = resolve(__dirname, 'templates');
 
 /** @internal */
+const UNIQUE_MEMBER_ID_FILTER = 'uniqueMemberId';
+
+/** @internal */
 export interface NunjucksRendererOptions extends njk.ConfigureOptions {
   /** Base directory paths for the renderer to find any template files */
   baseDirs?: string[];

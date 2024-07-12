@@ -2,17 +2,19 @@ import * as ts from 'typescript';
 import {
   getModifierFlagsFromNode,
   getNodesBySelectors,
-  getTypeInfoFromNode,
   ResolvedNode,
-  ReturnTypeInfo,
-  tryGetReturnTypeFromNode,
-  TypeInfo,
 } from '../utils';
 import { Decorator, getDecoratorsFromNode } from './decorator';
 import { Dependency } from './dependency';
 import { Field, getFieldsFromNode } from './field';
 import { getMethodsFromNode, Method } from './method';
 import { getParamsFromNode, Parameter } from './parameter';
+import {
+  getTypeInfoFromNode,
+  ReturnTypeInfo,
+  tryGetReturnTypeFromNode,
+  TypeInfo,
+} from './type-info';
 
 export enum MemberKind {
   Class = 'class',
@@ -62,6 +64,7 @@ export interface Member
   params: Parameter[];
   kind: MemberKind;
   name: string;
+  uniqueName: string;
   isExported: boolean;
   isAbstract: boolean;
 }
@@ -96,6 +99,7 @@ export function getMembersFromSourceFile(
         // cannot be resolved statically. will be resolved within a project view
         // after all members are collected and indexed
         deps: [] as Dependency[],
+        // same goes for the `uniqueName` field
       } as Member)
   );
 }

@@ -1,6 +1,6 @@
 {% set baseIndentSize = indentSize -%}
 
-{{ ('namespace ' + namespace.path + ' {') | indent(indentSize, true) }}
+{{ ('namespace ' + (namespace.path | replace('/', '_') | replace('.', '_')) + ' {') | indent(indentSize, true) }}
 {% for member in namespace.members %}
   {% block member %}
     {% include 'tsplot/mermaid/member.njk' %}
