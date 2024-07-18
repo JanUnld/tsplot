@@ -1,7 +1,6 @@
 export * from './modifier-flags';
 export * from './tsconfig';
 export * from './selector';
-export * from './comment';
 export * from './dedupe';
 export * from './indent';
 export * from './match';

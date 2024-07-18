@@ -6,7 +6,8 @@ export type TypeInfoFormatOptions = {
    * Removes the `| undefined` segment of the formatted string result when `true`.
    * This is especially useful for cases where a type might be `undefined` because
    * its source symbol is marked as optional by `?`
-   * @example ```typescript
+   *
+   * ```typescript
    * // format would be "string | undefined"
    * typeInfo.typeToString({ removeUndefined: true })
    * // instead returns "string"
