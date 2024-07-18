@@ -277,10 +277,10 @@ export async function getConfinedProjectViewFromMemberOrDefault(
   // project view. If that's the case, then we want to include it in the new view
   const isConfinedMemberSourceFile: SourceFileFilterFn = (s) =>
     members
-      .map((m) => projectView.getFileOfMember(m)?.source.fileName)
+      .map((m) => m.node.getSourceFile().fileName)
       .some((fileName) => s.fileName === fileName);
   const isConfinedMember: MemberFilterFn = (m) =>
-    members.some((m2) => m2.name === m.name);
+    members.some((m2) => m2.uniqueName === m.uniqueName);
 
   return new ProjectView({
     program: projectView.getProgram(),
