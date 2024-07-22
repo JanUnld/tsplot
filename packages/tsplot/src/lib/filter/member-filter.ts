@@ -1,4 +1,4 @@
-import { Member } from '../core';
+import { ProjectMember } from '../core';
 import { Predicate } from './filter-set';
 
-export type MemberFilterFn = Predicate<Member>;
+export type MemberFilterFn = Predicate<ProjectMember>;

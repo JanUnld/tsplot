@@ -14,11 +14,9 @@ import {
   includeMemberKindOf,
   includeMemberName,
   includeSourceFiles,
-  MemberFilterFn,
   MemberKind,
   PathsLike,
   ProjectView,
-  SourceFileFilterFn,
 } from '../../lib';
 import {
   insertBeforeExtension,
@@ -273,20 +271,9 @@ export async function getConfinedProjectViewFromMemberOrDefault(
   const members = deferred && (await Promise.all(deferred)).flat();
   if (!members) return projectView;
 
-  // checks whether a given member is included in the confined view of the original
-  // project view. If that's the case, then we want to include it in the new view
-  const isConfinedMemberSourceFile: SourceFileFilterFn = (s) =>
-    members
-      .map((m) => m.node.getSourceFile().fileName)
-      .some((fileName) => s.fileName === fileName);
-  const isConfinedMember: MemberFilterFn = (m) =>
-    members.some((m2) => m2.uniqueName === m.uniqueName);
-
-  return new ProjectView({
-    program: projectView.getProgram(),
-    sourceFileFilter: [isConfinedMemberSourceFile],
-    memberFilter: [isConfinedMember, ...projectView.filter.decompose()],
-    paths: projectView.getPaths(),
+  return ProjectView.withOverride({
+    oldView: projectView,
+    members,
   });
 }
 

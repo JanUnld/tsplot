@@ -1,6 +1,12 @@
 import { EOL } from 'os';
 import * as ts from 'typescript';
-import { Field, Member, MemberKind, Method, Parameter } from '../../core';
+import {
+  Field,
+  MemberKind,
+  Method,
+  Parameter,
+  ProjectMember,
+} from '../../core';
 import { AccessModifiers, indent } from '../../utils';
 import { joinAndNormalizeSpace } from '../../utils/space';
 import { RelationDiagramOptions, RelationEdge } from '../relation-diagram';
@@ -27,7 +33,7 @@ function renderAccessModifiers(
 }
 
 /** @internal */
-function getShapeTypeFromMember(m: Member): string {
+function getShapeTypeFromMember(m: ProjectMember): string {
   let type: string;
   switch (m.kind) {
     case 'class':
@@ -52,7 +58,7 @@ function getShapeTypeFromMember(m: Member): string {
 }
 
 /** @internal */
-function renderField(f: Field, member: Member): string {
+function renderField(f: Field, member: ProjectMember): string {
   let typeStr = f.typeToString({ removeUndefined: f.isOptional });
   if (typeStr) typeStr = `: ${typeStr}`;
 
@@ -64,7 +70,7 @@ function renderField(f: Field, member: Member): string {
 }
 
 /** @internal */
-function renderMethod(m: Method, member: Member): string {
+function renderMethod(m: Method, member: ProjectMember): string {
   const params = m.params.map(renderParameter).join(', ');
   return joinAndNormalizeSpace([
     renderAccessModifiers(m, member.kind),
@@ -82,7 +88,7 @@ function renderParameter(p: Parameter): string {
 
 /** @internal */
 export function renderMember(
-  m: Member,
+  m: ProjectMember,
   options?: PlantUMLRenderOptions
 ): string {
   const shapeType = getShapeTypeFromMember(m);

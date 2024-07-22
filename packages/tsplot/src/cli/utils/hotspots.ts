@@ -1,4 +1,4 @@
-import { Member, ProjectView } from '../../lib';
+import { ProjectMember, ProjectView } from '../../lib';
 import { entriesToObject, groupSums } from './accumulators';
 import { SharedOptions } from './shared-options';
 
@@ -16,7 +16,7 @@ export interface HotspotOptions extends SharedOptions {
 export async function collectHotspots(
   projectView: ProjectView,
   options?: HotspotOptions,
-  members: Member[] = projectView.members
+  members: ProjectMember[] = projectView.members
 ): Promise<Hotspots> {
   // intermediate result, not intended for further usage besides hotspot identification
   const memberDepsExpansion = await Promise.all(

@@ -1,10 +1,10 @@
 import * as ts from 'typescript';
-import { Member } from '../core';
+import { ProjectMember } from '../core';
 import { AccessModifiers } from '../utils';
 import { RelationEdge } from './relation-diagram';
 
 /** @internal */
-export function renderNameQuoted(m: Member): string {
+export function renderNameQuoted(m: ProjectMember): string {
   return `"${m.name + (ts.isFunctionLike(m.node) ? '()' : '')}"`;
 }
 
@@ -22,7 +22,7 @@ export function renderOptional(o: { isOptional?: boolean }) {
 }
 
 /**
- * Used to render the connection of two related {@link Member}s
+ * Used to render the connection of two related {@link ProjectMember}s
  * @internal
  */
 export function renderEdgeConnection(edge: RelationEdge): string {

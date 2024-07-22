@@ -10,6 +10,6 @@ export * from './parameter';
 export * from './type-info';
 export * from './namespace';
 export * from './import';
-export * from './member';
+export * from './project-member';
 export * from './method';
 export * from './field';

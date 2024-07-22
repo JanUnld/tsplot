@@ -1,4 +1,4 @@
-import { getMemberUniqueId, Member } from '../core';
+import { getMemberUniqueId, ProjectMember } from '../core';
 
 /** @internal */
 export function dedupe<T>(it: T, index: number, arr: T[]): boolean {
@@ -13,6 +13,6 @@ export function dedupeBy<T>(selector: (it: T) => any) {
 }
 
 /** @internal */
-export const dedupeByMemberUniqueId = dedupeBy<Member>((m) =>
+export const dedupeByMemberUniqueId = dedupeBy<ProjectMember>((m) =>
   getMemberUniqueId(m)
 );

@@ -1,11 +1,11 @@
 import * as ts from 'typescript';
 import { getImportsFromSourceFile, Import } from './import';
-import { getMembersFromSourceFile, Member } from './member';
+import { getMembersFromSourceFile, ProjectMember } from './project-member';
 
 export interface ProjectFile {
   source: ts.SourceFile;
   imports: Import[];
-  members: Member[];
+  members: ProjectMember[];
 }
 
 /** @internal */

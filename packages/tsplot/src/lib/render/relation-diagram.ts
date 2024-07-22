@@ -1,4 +1,4 @@
-import { DependencyOrigin, Member } from '../core';
+import { DependencyOrigin, ProjectMember } from '../core';
 import { FilterSet } from '../filter';
 import { Diagram, DiagramOptions } from './diagram';
 
@@ -22,12 +22,12 @@ export function getRelationTypeFromDependencyOrigin(
 
 export interface RelationEdge {
   type: RelationType;
-  from: Member;
-  to: Member;
+  from: ProjectMember;
+  to: ProjectMember;
 }
 
 /** @internal */
-function getEdgesOfMember(member: Member, members: Member[]) {
+function getEdgesOfMember(member: ProjectMember, members: ProjectMember[]) {
   return member.deps
     .map<RelationEdge>((d) => ({
       type: getRelationTypeFromDependencyOrigin(d.origin),
@@ -37,20 +37,20 @@ function getEdgesOfMember(member: Member, members: Member[]) {
     .filter(Boolean);
 }
 
-export function getEdges(members: Member[]) {
+export function getEdges(members: ProjectMember[]) {
   return members
     .flatMap((m) => getEdgesOfMember(m, members))
     .filter((e) => e.from && e.to);
 }
 
 export interface RelationDiagramOptions extends DiagramOptions {
-  /** Include {@link Member}s without any relation (edge) to other members */
+  /** Include {@link ProjectMember}s without any relation (edge) to other members */
   edgeless?: boolean;
 }
 
 export abstract class RelationDiagram extends Diagram {
-  override getMembers(options?: RelationDiagramOptions): Member[] {
-    const filters = new FilterSet<Member>();
+  override getMembers(options?: RelationDiagramOptions): ProjectMember[] {
+    const filters = new FilterSet<ProjectMember>();
 
     const members = super.getMembers(options);
 

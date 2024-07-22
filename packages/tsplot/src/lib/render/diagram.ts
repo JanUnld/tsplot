@@ -1,30 +1,30 @@
-import { Member } from '../core';
+import { ProjectMember } from '../core';
 import { FilterSet } from '../filter';
 
 export interface DiagramOptions {
   /**
-   * Include non-exported {@link Member}s
+   * Include non-exported {@link ProjectMember}s
    * @remarks "Exported" means that the member is accessible from outside the
    *  module (file). **Not** the package in general
    */
   nonExported?: boolean;
-  /** Exclude {@link Member.fields} from rendering. Defaults to `true` */
+  /** Exclude {@link ProjectMember.fields} from rendering. Defaults to `true` */
   fields?: boolean;
-  /** Exclude {@link Member.methods} from rendering. Defaults to `true` */
+  /** Exclude {@link ProjectMember.methods} from rendering. Defaults to `true` */
   methods?: boolean;
 }
 
 export abstract class Diagram {
-  private readonly _members: Member[];
+  private readonly _members: ProjectMember[];
 
-  readonly filters = new FilterSet<Member>();
+  readonly filters = new FilterSet<ProjectMember>();
 
-  constructor(members: Member[]) {
+  constructor(members: ProjectMember[]) {
     this._members = members ?? [];
   }
 
-  getMembers(options?: DiagramOptions): Member[] {
-    const filters = new FilterSet<Member>(this.filters.decompose());
+  getMembers(options?: DiagramOptions): ProjectMember[] {
+    const filters = new FilterSet<ProjectMember>(this.filters.decompose());
 
     if (!options?.nonExported) {
       filters.add((m) => m.isExported);

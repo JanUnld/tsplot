@@ -34,3 +34,23 @@ export function logDeprecationWarning(
     `${target} is DEPRECATED! Please use ${options.replaceWith} instead.`
   );
 }
+
+export function logSizeWarningIfExceeding(options: {
+  edges: number;
+  output: string;
+  maxEdges: number;
+  maxOutputSize: number;
+  description?: string;
+}) {
+  const { edges, maxEdges, output, maxOutputSize, description } = options;
+  const tooManyEdges = edges > maxEdges;
+  const tooMuchText = output.length > maxOutputSize;
+
+  if (tooManyEdges || tooMuchText) {
+    consola.warn(
+      `The generated output exceeds the maximum text size (${maxOutputSize}) or amount of edges (${maxEdges}). ` +
+        'Consider refining the filter options to reduce the output diagram size (see --help)' +
+        (description ? ` ${description}` : '')
+    );
+  }
+}

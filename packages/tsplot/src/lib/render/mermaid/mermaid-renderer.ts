@@ -1,6 +1,6 @@
 import { EOL } from 'os';
 import * as ts from 'typescript';
-import { Field, Member, Method, Parameter } from '../../core';
+import { Field, Method, Parameter, ProjectMember } from '../../core';
 import { AccessModifiers, indent, joinAndNormalizeSpace } from '../../utils';
 import { RelationDiagramOptions, RelationEdge } from '../relation-diagram';
 import {
@@ -21,7 +21,7 @@ function renderSuffixClassifiers(am: AccessModifiers): string {
 }
 
 /** @internal */
-function renderAnnotation(m: Member): string {
+function renderAnnotation(m: ProjectMember): string {
   let annotation = '';
   switch (m.kind) {
     // case ?:
@@ -43,12 +43,12 @@ function renderAnnotation(m: Member): string {
   return annotation ? `<<${annotation}>>` : '';
 }
 
-function renderMemberIdentifier(m: Member): string {
+function renderMemberIdentifier(m: ProjectMember): string {
   return `${m.name} :`;
 }
 
 /** @internal */
-function renderField(f: Field, member: Member) {
+function renderField(f: Field, member: ProjectMember) {
   const isEnum = ts.isEnumDeclaration(member.node);
   const visibility = !isEnum ? renderVisibility(f) : '';
   const type = !isEnum ? f.typeToString({ removeUndefined: f.isOptional }) : '';
@@ -66,7 +66,7 @@ function renderField(f: Field, member: Member) {
 }
 
 /** @internal */
-function renderMethod(m: Method, member: Member): string {
+function renderMethod(m: Method, member: ProjectMember): string {
   const params = m.params.map(renderParameter).join(', ');
   const method = joinAndNormalizeSpace(
     [
@@ -97,7 +97,7 @@ function renderParameter(p: Parameter): string {
 
 /** @internal */
 export function renderMember(
-  m: Member,
+  m: ProjectMember,
   options?: MermaidRenderOptions
 ): string {
   const annotation = renderAnnotation(m);
