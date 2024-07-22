@@ -3,7 +3,9 @@
 {% block content %}
   {% for namespace in projectView.namespaces %}
     {% block namespace %}
-      {% include 'tsplot/plant-uml/namespace.njk' %}
+      {% if namespace.members.length > 0 %}
+        {% include 'tsplot/plant-uml/namespace.njk' %}
+      {% endif %}
     {% endblock %}
   {% endfor %}
   {% for member in projectView.orphans %}

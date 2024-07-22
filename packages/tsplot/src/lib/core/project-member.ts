@@ -54,7 +54,7 @@ export function getMemberKindFromSyntaxKind(
 
 // todo: consider different member interfaces for different member types (e.g. ClassMember, InterfaceMember, etc.)
 
-export interface Member
+export interface ProjectMember
   extends ResolvedNode,
     TypeInfo,
     Partial<ReturnTypeInfo> {
@@ -75,7 +75,7 @@ export interface Member
 export function getMembersFromSourceFile(
   source: ts.SourceFile,
   typeChecker: ts.TypeChecker
-): Member[] {
+): ProjectMember[] {
   const selectors: string[] = [
     'ClassDeclaration > Identifier',
     'InterfaceDeclaration > Identifier',
@@ -103,11 +103,11 @@ export function getMembersFromSourceFile(
         // after all members are collected and indexed
         deps: [] as Dependency[],
         // same goes for the `uniqueName` field
-      } as Member)
+      } as ProjectMember)
   );
 }
 
 /** @internal */
-export function getMemberUniqueId(member: Member) {
+export function getMemberUniqueId(member: ProjectMember) {
   return `${member.node.getSourceFile().fileName}#${member.name}`;
 }

@@ -40,6 +40,8 @@ A simple-to-use CLI and tooling library to plot [Typescript][web-ts] project inf
 
 ## Usage
 
+You can always use the help to get an overview of the available commands and options.
+
 ```bash
 npx tsplot --help
 ```
@@ -86,20 +88,22 @@ This is an example showcasing a class diagram for a subset of this project.
 > [!NOTE]  
 > The diagrams might be outdated.
 
-### Plant UML
+### PlantUML
 
 Executing the shell command below:
 
 ```shell
-npx tsplot render class-diagram 
-  --project $tsconfig \
-  --groupBy 'tsPaths' \
-  --exclude '**/cli/**' \
-  --includeName 'Project*' 'Template*' 'render' 'RenderOptions' \
-  --output './example.puml'
+$tsp render class-diagram \ 
+  --project $tsconfig \ 
+  --output './tsplot.project-view.puml' \
+  --groupBy 'tsplot/core:**/lib/core/**' 'tsplot/filter:**/lib/filter/**' \
+  --exclude '**/utils/**' '**/cli/**' \
+  --excludeKind 'variable' 'function' \
+  --from 'ProjectView' \
+  --depth 0
 ```
 
-Generates the Plant UML code in [`example.puml`](assets/puml/example.puml), which results in the following diagram:
+Generates the PlantUML code in [`example.puml`](assets/puml/example.puml), which results in the following diagram:
 
 ![example](assets/svg/example.svg)
 
@@ -120,4 +124,4 @@ npx tsplot render class-diagram \
 
 ---
 
-Make sure to check the [concept documents](./docs/concepts) for more information about the library and its features.
+Make sure to check the [roadmap](./ROADMAP.md) and [concept](./docs/concepts) documents for more information about the library and its features.

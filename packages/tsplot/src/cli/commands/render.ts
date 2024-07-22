@@ -4,6 +4,7 @@ import {
   KnownTarget,
   KnownTemplate,
   PathsLike,
+  ProjectGraph,
   ProjectView,
   render as _render,
 } from '../../lib';
@@ -15,6 +16,7 @@ import {
   getProjectView,
   interpolateOutputPath,
   logSharedOptions,
+  logSizeWarningIfExceeding,
   output,
   parseKeyValueListPair,
   setupConsola,
@@ -99,12 +101,28 @@ export async function render(
     paths: getPaths(options),
   });
 
-  const renderView = (projectView: ProjectView) =>
-    _render(template, {
+  const renderView = (projectView: ProjectView) => {
+    const output = _render(template, {
       baseDir: options.baseDir,
       context: { projectView },
       target: options.target,
     });
+
+    if (options.target === KnownTarget.Mermaid) {
+      logSizeWarningIfExceeding({
+        output,
+        edges: ProjectGraph.fromView(projectView, { keepFilter: true }).edges
+          .length,
+        maxOutputSize: 50000,
+        maxEdges: 500,
+        description:
+          'These are defaults set by Mermaid. To allow rendering of larger diagrams ' +
+          'you can adjust the configuration (see https://mermaid.js.org/config/schema-docs/config.html)',
+      });
+    }
+
+    return output;
+  };
 
   if (options.debug) {
     const s = await collectStats({ ...options, silent: true });

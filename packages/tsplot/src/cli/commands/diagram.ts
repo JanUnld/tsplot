@@ -2,9 +2,9 @@ import { Command, Option } from 'commander';
 import { consola } from 'consola';
 import {
   KnownTarget,
-  Member,
   MermaidClassDiagram,
   PlantUMLClassDiagram,
+  ProjectMember,
 } from '../../lib';
 import {
   collectStats,
@@ -13,6 +13,7 @@ import {
   interpolateOutputPath,
   logDeprecationWarning,
   logSharedOptions,
+  logSizeWarningIfExceeding,
   output,
   setupConsola,
   setupSharedOptions,
@@ -71,26 +72,25 @@ export function setupDiagramCommand(program: Command) {
  */
 export function getDiagramRenderer(
   options: DiagramOptions
-): (member: Member[], options: DiagramOptions) => string {
+): (member: ProjectMember[], options: DiagramOptions) => string {
   switch (options.renderer) {
     case 'plant-uml':
-      return (members: Member[]) =>
+      return (members: ProjectMember[]) =>
         new PlantUMLClassDiagram(members).render(options);
     case 'mermaid':
-      return (members: Member[]) => {
+      return (members: ProjectMember[]) => {
         const diagram = new MermaidClassDiagram(members);
-        const tooManyEdges = diagram.getEdges(options).length > 500;
-
         const output = new MermaidClassDiagram(members).render(options);
-        const tooMuchText = output.length > 50000;
 
-        if (tooManyEdges || tooMuchText) {
-          consola.warn(
-            'The generated output exceeds the default maximum text size or amount of edges. Make sure to configure ' +
-              'Mermaid properly to allow rendering of larger diagrams (see https://mermaid.js.org/config/schema-docs/config.html) ' +
-              'or consider refining the filter options to reduce the output diagram size (see --help)'
-          );
-        }
+        logSizeWarningIfExceeding({
+          output,
+          edges: diagram.getEdges().length,
+          maxOutputSize: 50000,
+          maxEdges: 500,
+          description:
+            'These are defaults set by Mermaid. To allow rendering of larger diagrams ' +
+            'you can adjust the configuration (see https://mermaid.js.org/config/schema-docs/config.html)',
+        });
 
         return output;
       };

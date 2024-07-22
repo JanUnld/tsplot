@@ -1,4 +1,4 @@
-import { getMemberUniqueId, Member, ProjectView } from './index';
+import { getMemberUniqueId, ProjectMember, ProjectView } from './index';
 
 /** @internal */
 const GLOB_STAR = '**';
@@ -13,7 +13,7 @@ function prependPatternWithGlobStar(pattern: string) {
 }
 
 export type PathsLike = Record<string, string[]>;
-export type PathsWithMembers = Record<string, Member[]>;
+export type PathsWithMembers = Record<string, ProjectMember[]>;
 
 /** @internal */
 export function getPathsWithMembersFromProjectView(
@@ -43,5 +43,5 @@ export function getOrphanMembersFromProjectView(
 
 export interface Namespace {
   path: string;
-  members: Member[];
+  members: ProjectMember[];
 }

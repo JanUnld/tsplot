@@ -8,7 +8,6 @@ import {
 } from '../filter';
 import { dedupeBy, dedupeByMemberUniqueId, matchRegExpOrGlob } from '../utils';
 import { Dependency, DependencyOrigin } from './dependency';
-import { getMemberUniqueId, Member, MemberKind } from './member';
 import {
   getOrphanMembersFromProjectView,
   getPathsWithMembersFromProjectView,
@@ -16,13 +15,14 @@ import {
   PathsLike,
 } from './namespace';
 import { getProjectFileFromSourceFile, ProjectFile } from './project-file';
+import { getMemberUniqueId, MemberKind, ProjectMember } from './project-member';
 import {
   getProgramFromProjectViewOptions,
   ProjectViewOptions,
 } from './project-view-options';
 
 /** @internal */
-function coerceMemberName(memberOrName: Member | string) {
+function coerceMemberName(memberOrName: ProjectMember | string) {
   return typeof memberOrName === 'string' ? memberOrName : memberOrName.name;
 }
 
@@ -40,21 +40,21 @@ export class ProjectView {
   private readonly _program: ts.Program;
   private _namespaces: Namespace[] = [];
   private _files: ProjectFile[] = [];
-  private _members: Member[] = [];
-  private _orphans: Member[] = [];
+  private _members: ProjectMember[] = [];
+  private _orphans: ProjectMember[] = [];
   private _paths: PathsLike = {};
 
-  readonly filter = new FilterSet<Member>([excludeNonExported()]);
+  readonly filter = new FilterSet<ProjectMember>([excludeNonExported()]);
 
   get files(): ProjectFile[] {
     return this._files;
   }
 
-  get members(): Member[] {
+  get members(): ProjectMember[] {
     return this.filter.apply(this._members);
   }
 
-  get orphans(): Member[] {
+  get orphans(): ProjectMember[] {
     return this._orphans;
   }
 
@@ -74,16 +74,15 @@ export class ProjectView {
     this._initNamespacesAndOrphans(options.paths);
   }
 
-  async getDependencyMembers(member: Member, options?: { depth?: number }) {
+  async getDependencyMembers(
+    member: ProjectMember,
+    options?: { depth?: number }
+  ) {
     let depth = options?.depth;
 
     let deps = member.deps
-      .map((d) =>
-        this.getMemberByName(d.name, {
-          sourceFileName: d.node.getSourceFile().fileName,
-        })
-      )
-      .filter(Boolean) as Member[];
+      .map((d) => this.getMemberByName(d.name))
+      .filter(Boolean) as ProjectMember[];
 
     if (depth === 0)
       return deps.concat(member).filter(this.hasMember.bind(this));
@@ -100,12 +99,15 @@ export class ProjectView {
     return deps.concat(member).filter(this.hasMember.bind(this));
   }
 
-  async getDependentMembers(member: Member, options?: { depth?: number }) {
+  async getDependentMembers(
+    member: ProjectMember,
+    options?: { depth?: number }
+  ) {
     let depth = options?.depth;
 
     let dependents = this.members
       .filter((m) => m.deps.some((d) => d.name === member.name))
-      .filter(Boolean) as Member[];
+      .filter(Boolean) as ProjectMember[];
 
     if (depth === 0)
       return dependents.concat(member).filter(this.hasMember.bind(this));
@@ -130,7 +132,7 @@ export class ProjectView {
     name: string,
     options?: { sourceFileName?: string | RegExp }
   ) {
-    return this.members.find((m) => {
+    return this._members.find((m) => {
       // checks whether the member is part of the source file if specified
       const isInSrc =
         !options?.sourceFileName ||
@@ -145,7 +147,7 @@ export class ProjectView {
     });
   }
 
-  getFileOfMember(member: Member) {
+  getFileOfMember(member: ProjectMember) {
     return this.files.find((f) => f.members.includes(member));
   }
 
@@ -153,7 +155,7 @@ export class ProjectView {
     return this.files.filter(includeProjectFiles(...pattern));
   }
 
-  hasMember(memberOrName: Member | string) {
+  hasMember(memberOrName: ProjectMember | string) {
     const memberName = coerceMemberName(memberOrName);
     return this.members.some((m) => m.name === memberName);
   }
@@ -171,7 +173,7 @@ export class ProjectView {
           ? this.getFilesByPattern(fileOrPattern)
           : [fileOrPattern];
       })
-      .flatMap<Member>((file) => {
+      .flatMap<ProjectMember>((file) => {
         const fileSymbol = this._typeChecker.getSymbolAtLocation(file.source);
         if (!fileSymbol) return [];
         // secondly we are using the files to receive a symbol and from the symbol
@@ -184,7 +186,8 @@ export class ProjectView {
               sourceFileName: s.declarations?.[0].getSourceFile().fileName,
             })
           )
-          .filter(Boolean) as Member[];
+          .filter(Boolean)
+          .filter((m) => this.hasMember(m!)) as ProjectMember[];
       })
       // finally we dedupe the members since we cannot be sure whether there are
       // multiple occurrences due to the nature of the method signature
@@ -212,11 +215,14 @@ export class ProjectView {
 
     this._files = files.map((file) => ({
       ...file,
-      members: file.members.map((member) => ({
-        ...member,
-        uniqueName: this._getUniqueName(member),
-        deps: this._getDirectDeps(member),
-      })),
+      members: file.members.map(
+        (member) =>
+          <ProjectMember>{
+            ...member,
+            uniqueName: this._getUniqueName(member),
+            deps: this._getDirectDeps(member),
+          }
+      ),
     }));
     this._members = this._files.flatMap(toMembers);
   }
@@ -237,7 +243,7 @@ export class ProjectView {
     );
   }
 
-  private _getDirectDeps(member: Member): Dependency[] {
+  private _getDirectDeps(member: ProjectMember): Dependency[] {
     const toDep = (origin: DependencyOrigin, node: ts.Node) =>
       <Dependency>{
         origin,
@@ -275,7 +281,7 @@ export class ProjectView {
     // todo: improve dependency resolution for non exported file members
 
     // makes sure to not match any arbitrary name strings as actual dependency
-    const hasMemberFileDependencyImport = (m: Member, d: Dependency) => {
+    const hasMemberFileDependencyImport = (m: ProjectMember, d: Dependency) => {
       const file = member && this.getFileOfMember(member);
       return (
         file?.imports.some((i) => i.identifiers.includes(d.name)) ||
@@ -289,7 +295,7 @@ export class ProjectView {
       .filter(dedupeBy((d) => d.name));
   }
 
-  private _getUniqueName(member: Member) {
+  private _getUniqueName(member: ProjectMember) {
     const occurrenceIndex = this.members
       .filter((m) => m.name === member.name)
       .findIndex((m) => getMemberUniqueId(m) === getMemberUniqueId(member));
@@ -298,4 +304,29 @@ export class ProjectView {
       ? `${member.name}_${occurrenceIndex}`
       : member.name;
   }
+
+  // <editor-fold desc="Static">
+
+  static withOverride(options: {
+    oldView: ProjectView;
+    files?: ProjectFile[];
+    members?: ProjectMember[];
+    paths?: PathsLike;
+  }) {
+    const { oldView, files, members, paths } = options;
+    const newView = new ProjectView({
+      fileNames: [],
+      compilerOptions: oldView.getProgram().getCompilerOptions(),
+      memberFilter: oldView.filter.decompose(),
+    });
+    newView._files = files ?? oldView._files;
+    newView._members = members ?? oldView._members;
+    newView._paths = paths ?? oldView._paths;
+
+    newView._initNamespacesAndOrphans(newView._paths);
+
+    return newView;
+  }
+
+  // </editor-fold>
 }
