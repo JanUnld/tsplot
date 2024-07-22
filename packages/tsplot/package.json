@@ -1,6 +1,6 @@
 {
   "name": "tsplot",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Analyzes the dependencies within a typescript project and generates stats and diagrams",
   "license": "MIT",
   "author": "Jan Unnold",

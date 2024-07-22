@@ -3,7 +3,7 @@
 > [!WARNING]  
 > This project is still in its early stages. Since most of the codebase is currently experimental, major changes shall be expected to happen!
 
-A simple-to-use CLI and tooling library to plot [Typescript][web-ts] project information to different template targets. Either using built-in targets, such as [PlantUML][web-puml] or [Mermaid][web-mmd], but also supporting custom templates and targets.
+A CLI and tooling library to plot [Typescript][web-ts] project information to different template targets. Either using built-in targets, such as [PlantUML][web-puml] or [Mermaid][web-mmd], but also supporting custom templates and targets.
 
   [web-ts]: https://www.typescriptlang.org
   [web-puml]: https://plantuml.com
@@ -46,7 +46,7 @@ You can always use the help to get an overview of the available commands and opt
 npx tsplot --help
 ```
 
-> [!NOTE]  
+> [!TIP]  
 > Make sure to take a look at the `--help` output of the subcommands to get a full overview of the available options.
 
 ### Rendering
