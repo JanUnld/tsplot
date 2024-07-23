@@ -12,6 +12,7 @@
         "main": "packages/tsplot/src/index.ts",
         "tsConfig": "packages/tsplot/tsconfig.lib.json",
         "assets": [
+          "packages/tsplot/src/lib/render2/templates/**/*.njk",
           "packages/tsplot/LICENSE",
           "packages/tsplot/*.{svg,png}",
           "packages/tsplot/*.md"

@@ -1,31 +1,48 @@
 # Namespace grouping
 
-1. Custom grouping by glob matching — _easiest_
-   - `--groupBy 'tsplot/cli:\*\*/cli/**`'`
-   - `--groupBy 'tsplot:*'` — fallthrough if nothing else matches
-   - should allow multiple options
-   - should allow ungrouped members without a group
-2. Grouping by tsconfig paths — _hardest_
-   - `--groupBy 'tsPaths'`
-   - probably pretty complex, needs resolving of all actually exported members, same as with barrel index files
-3. Grouping by file (module) — _medium_
-   - `--groupBy 'filePath'` — full path including dir
-   - `--groupBy 'fileName'` — only file name
-   - `--groupBy 'folder'` — only folder path
-   - paths should be relative to the project root
-   - paths should only consist of the least relevant segments, expanding whenever duplicates would appear (e.g. `utils` → `lib/utils`, `cli/utils`)
-4. Barrel index files — _hard_ (see `tsPaths` grouping above)
-   - `--groupBy 'index'`
-   - find barrel index files and group exported members together, this uses a similar approach as the `tsPaths` grouping
+Namespace grouping is supposed to provide a way to group project members together. This might be useful to distinguish the higher order location a project member belongs to. For example, this project could be grouped into two namespaces: `tsplot` and `tsplot/cli`, but since the CLI code isn't exposed by itself, it's not necessary to create a separate namespace for it within the `tsconfig.json`. It's possible to manually define how a namespace should be cut using the following format:
 
-## Resolving exported members
+```
+namespace:pattern,pattern
+```
 
-Finding all exported members of a module is not trivial, especially when considering the different ways of exporting members in TypeScript. The `ProjectView` class exposes a dedicated method for resolving exported members of a `ProjectFile`.
+The format can be summarized as follows:
 
-**Example**
+- `namespace` <br>
+  The name of the namespace that should be created
+- `pattern,pattern` <br>
+  A comma separated list of glob patterns that matches the files that should be included in the namespace
+
+## API
+
+When creating project views, you're able to define a typescript paths like structure that allows to group files together. By default, the project view instance will infer potential namespaces from the `tsconfig.json` paths.
 
 ```typescript
-const exports = projetView.getExportedMembersOfFile('project-view.ts');
+const projectView = new ProjectView({
+  tsConfigPath,
+  paths: {
+    'tsplot': ['**/lib/**'],
+    'tsplot/cli': ['**/cli/**'],
+  }
+});
+```
 
-console.log(moduleExports.map(s => s.name)); // → [ 'ProjectView' ]
+Namespaces and potential orphaned project members can be accessed using the `namespaces` and `orphans` properties.
+
+```typescript
+projectView.namespaces; // { tsplot: [ ... ], 'tsplot/cli': [ ... ] }
+projectView.orphans; // [ ... ]
+```
+
+## CLI
+
+The CLI also integrates with this approach and allows to define grouping behavior using the `--groupBy` option.
+
+> [!WARNING]  
+> The CLI will not infer namespaces from the `tsconfig.json` paths by default. If you want to use this feature, you have to define the `--groupBy` option with the value `tsPaths`. This can be used in combination with manually set namespaces.
+
+```bash
+npx tsplot render class-diagram \
+  --groupBy 'tsplot:**/lib/**' 'tsplot/cli:**/cli/**' \
+  --output 'tsplot.puml'
 ```

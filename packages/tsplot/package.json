@@ -1,7 +1,7 @@
 {
   "name": "tsplot",
-  "version": "0.3.0",
-  "description": "Analyzes the dependencies within a typescript project and generates stats and diagrams",
+  "version": "0.3.1",
+  "description": "A CLI and tooling library to plot Typescript project information to different template targets.",
   "license": "MIT",
   "author": "Jan Unnold",
   "bin": "./src/cli/bin.js",

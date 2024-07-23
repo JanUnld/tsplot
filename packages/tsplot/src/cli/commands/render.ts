@@ -54,8 +54,8 @@ export function setupRenderCommand(program: Command) {
       .option(
         '--groupBy <namespace:glob...>',
         'grouping specification to use for namespacing members. Can be a list of ' +
-          'custom specifiers in the format `namespace:glob` or `namespace:glob,glob`. ' +
-          'If not defined, will use paths definitions in the tsconfig.json file'
+          'custom specifiers in the format `namespace:glob` or `namespace:glob,glob` or. ' +
+          "the keyword `tsPaths` to use the typescript paths definitions. Won't group by default"
       )
       .addOption(
         new Option(
