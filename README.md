@@ -93,14 +93,14 @@ This is an example showcasing a class diagram for a subset of this project.
 Executing the shell command below:
 
 ```shell
-$tsp render class-diagram \ 
-  --project $tsconfig \ 
-  --output './tsplot.project-view.puml' \
+npx tsplot render class-diagram \
+  --project './packages/tsplot/tsconfig.lib.json' \
   --groupBy 'tsplot/core:**/lib/core/**' 'tsplot/filter:**/lib/filter/**' \
   --exclude '**/utils/**' '**/cli/**' \
   --excludeKind 'variable' 'function' \
   --from 'ProjectView' \
-  --depth 0
+  --depth 0 \
+  --output './tsplot.project-view.puml'
 ```
 
 Generates the PlantUML code in [`example.puml`](assets/puml/example.puml), which results in the following diagram:
