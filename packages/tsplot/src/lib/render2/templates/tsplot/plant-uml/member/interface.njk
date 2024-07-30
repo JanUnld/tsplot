@@ -1,4 +1,4 @@
-{% set brackets = forceBrackets or member.fields.length or member.methods.length %}
+{% set brackets = forceBrackets or member.fields.length or member.methods.length or member.ctor %}
 {% set baseIndentSize = baseIndentSize or 0 %}
 {% set kind = kind or 'interface' %}
 

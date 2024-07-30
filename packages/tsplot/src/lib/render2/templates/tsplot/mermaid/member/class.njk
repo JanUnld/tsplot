@@ -1,5 +1,5 @@
 {% set annotation = mermaid.annotation(member) %}
-{% set brackets = forceBrackets or member.fields.length or member.methods.length or annotation.length -%}
+{% set brackets = forceBrackets or member.fields.length or member.methods.length or annotation.length or member.ctor -%}
 {% set baseIndentSize = baseIndentSize or 0 -%}
 
 {{ ('class' | indent(baseIndentSize + indentSize, true)) + ' ' -}}
