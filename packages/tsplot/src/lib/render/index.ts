@@ -1,5 +1,3 @@
-export * from './plant-uml';
-export * from './mermaid';
-
-export * from './diagram';
-export * from './relation-diagram';
+export * from './template-file-renderer';
+export * from './nunjucks-renderer';
+export * from './render';

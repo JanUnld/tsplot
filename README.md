@@ -79,7 +79,7 @@ Following are the built-in targets:
 
 They can be set using the `--target` option when using the `render` command.
 
-Built-in templates are implemented using [Nunjucks][web-njk] and can also be customized and extended. For more information, check the [template engine concept](./docs/concepts/TEMPLATE_ENGINE.md). You can also take a look at the template implementations in [`lib/render2/templates`](./packages/tsplot/src/lib/render2/templates) for inspiration.
+Built-in templates are implemented using [Nunjucks][web-njk] and can also be customized and extended. For more information, check the [template engine concept](./docs/concepts/TEMPLATE_ENGINE.md). You can also take a look at the template implementations in [`lib/render2/templates`](packages/tsplot/src/lib/render/templates) for inspiration.
 
 ## Examples
 
