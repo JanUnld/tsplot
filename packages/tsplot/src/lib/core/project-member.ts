@@ -1,8 +1,10 @@
+import { includes } from '@phenomnomnominal/tsquery';
 import * as ts from 'typescript';
 import {
   getModifierFlagsFromNode,
   getNodesBySelectors,
   ResolvedNode,
+  traverseNodeParentsToMatching,
 } from '../utils';
 import { Constructor, getConstructorFromNode } from './constructor';
 import { Decorator, getDecoratorsFromNode } from './decorator';
@@ -30,10 +32,16 @@ export enum MemberKind {
 export const MemberType = MemberKind;
 
 /** @internal */
-export function getMemberKindFromSyntaxKind(
-  kind: ts.SyntaxKind
-): MemberKind | undefined {
-  switch (kind) {
+export function getMemberKindFromNode(node: ts.Node): MemberKind | undefined {
+  const isArrowFunctionVar =
+    (ts.isVariableStatement(node) || ts.isVariableDeclaration(node)) &&
+    includes(node, 'ArrowFunction');
+
+  if (isArrowFunctionVar) {
+    return MemberKind.Function;
+  }
+
+  switch (node.kind) {
     case ts.SyntaxKind.ClassDeclaration:
       return MemberKind.Class;
     case ts.SyntaxKind.InterfaceDeclaration:
@@ -76,13 +84,16 @@ export function getMembersFromSourceFile(
   source: ts.SourceFile,
   typeChecker: ts.TypeChecker
 ): ProjectMember[] {
+  const arrowFunctionVarDecl = 'VariableDeclaration > ArrowFunction';
+
   const selectors: string[] = [
     'ClassDeclaration > Identifier',
     'InterfaceDeclaration > Identifier',
     'EnumDeclaration > Identifier',
     'FunctionDeclaration > Identifier',
+    `SourceFile > VariableStatement:has(${arrowFunctionVarDecl}) VariableDeclaration > Identifier`,
     'TypeAliasDeclaration > Identifier',
-    'SourceFile > VariableStatement VariableDeclaration > Identifier:first-child',
+    `SourceFile > VariableStatement:not(:has(${arrowFunctionVarDecl})) VariableDeclaration > Identifier:first-child`,
   ];
 
   return getNodesBySelectors(source, selectors).map(
@@ -90,13 +101,16 @@ export function getMembersFromSourceFile(
       ({
         node: node.parent,
         name: node.getText(),
-        kind: getMemberKindFromSyntaxKind(node.parent.kind)!,
+        kind: getMemberKindFromNode(node.parent)!,
         ctor: getConstructorFromNode(node.parent, typeChecker),
         decorators: getDecoratorsFromNode(node.parent),
         fields: getFieldsFromNode(node.parent, typeChecker),
         methods: getMethodsFromNode(node.parent, typeChecker),
         params: getParamsFromNode(node.parent, typeChecker),
-        ...getModifierFlagsFromNode(node.parent, ['isExported', 'isAbstract']),
+        ...getModifierFlagsFromNode(
+          traverseNodeParentsToMatching(node, 'VariableStatement') ?? node,
+          ['isExported', 'isAbstract']
+        ),
         ...getTypeInfoFromNode(node.parent, typeChecker),
         ...tryGetReturnTypeFromNode(node.parent, typeChecker),
         // cannot be resolved statically. will be resolved within a project view

@@ -19,6 +19,7 @@ export function getMethodsFromNode(
     'MethodSignature',
     'MethodDeclaration',
     'Constructor',
+    // todo?: 'ArrowFunction',
   ];
 
   return getNodesBySelectors(node, selectors, [
