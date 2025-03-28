@@ -1,4 +1,4 @@
-import { getEdges, includeMemberKindOf, MemberKind } from '../../lib';
+import { includeMemberKindOf, MemberKind, ProjectGraph } from '../../lib';
 import { groupSums } from './accumulators';
 import { collectHotspots, HotspotOptions } from './hotspots';
 import { collectLinesOfCode, LinesOfCodeOptions } from './lines-of-code';
@@ -37,7 +37,7 @@ export async function collectStats(options: StatsOptions) {
     options
   );
   const members = confinedView.members;
-  const edges = getEdges(confinedView.members);
+  const edges = ProjectGraph.fromView(confinedView).edges;
   const decoratedBy = members
     .flatMap((m) => m.decorators.map((d) => d.name))
     .reduce(groupSums, {});

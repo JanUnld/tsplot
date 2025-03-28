@@ -268,6 +268,7 @@ export class ProjectView {
     );
 
     const otherQueries = [
+      // we do not want to include random variable that might appear within block scopes
       'VariableStatement:not(SourceFile > VariableStatement) Identifier:first-child',
       decoratorQuery,
       heritageQuery,
