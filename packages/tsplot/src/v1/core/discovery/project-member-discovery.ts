@@ -1,6 +1,6 @@
-import { inject, injectable } from 'inversify';
+import { inject, Provider, Type } from 'injection-js';
 import * as ts from 'typescript';
-import { TYPE_CHECKER } from '../di';
+import { TYPE_CHECKER } from '../typescript';
 
 export interface ProjectMember {
   symbol: ts.Symbol;
@@ -11,16 +11,17 @@ export interface ProjectMember {
   uniqueName: string;
 }
 
-export type ProjectMemberReflection<T extends ProjectMember> = Partial<Omit<T, keyof ProjectMember>>;
+export type ProjectMemberReflection<T extends ProjectMember> = Partial<
+  Omit<T, keyof ProjectMember>
+>;
 
 export function formatUniqueName(symbol: ts.Symbol, sourceFile?: ts.SourceFile): string {
   const fileName = sourceFile?.fileName ?? symbol.valueDeclaration?.getSourceFile().fileName;
   return `${fileName}#${symbol.escapedName}`;
 }
 
-@injectable()
 export abstract class ProjectMemberDiscovery<T extends ProjectMember = ProjectMember> {
-  @inject(TYPE_CHECKER) readonly typeChecker!: ts.TypeChecker;
+  readonly typeChecker = inject(TYPE_CHECKER);
 
   abstract query(sourceFile: ts.SourceFile): readonly ts.Node[];
   abstract reflect(member: ProjectMember): ProjectMemberReflection<T>;
@@ -42,4 +43,16 @@ export abstract class ProjectMemberDiscovery<T extends ProjectMember = ProjectMe
   fromSourceFile(sourceFile: ts.SourceFile): T[] {
     return this.query(sourceFile).map(this.fromNode.bind(this));
   }
+}
+
+export function provideMemberDiscovery(impl: Type<ProjectMemberDiscovery>): Provider {
+  return {
+    provide: ProjectMemberDiscovery,
+    useClass: impl,
+    multi: true,
+  };
+}
+
+export function provideMemberDiscoveries(impls: Type<ProjectMemberDiscovery>[]): Provider[] {
+  return impls?.map(provideMemberDiscovery) ?? [];
 }

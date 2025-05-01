@@ -11,7 +11,7 @@
     "commander": "^12.0.0",
     "consola": "^3.2.3",
     "fs-extra": "^11.2.0",
-    "inversify": "^7.1.0",
+    "injection-js": "^2.5.0",
     "minimatch": "^9.0.3",
     "nunjucks": "^3.2.4",
     "reflect-metadata": "^0.2.2",

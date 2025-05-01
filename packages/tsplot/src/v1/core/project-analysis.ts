@@ -1,29 +1,26 @@
-import { Container } from 'inversify';
+import { ReflectiveInjector } from 'injection-js';
 import { getProgramFromProjectViewOptions, ProjectViewOptions } from '../../lib';
-import { PROGRAM, TYPE_CHECKER } from './di';
-import { ProjectMember, ProjectMemberDiscovery } from './discovery';
-
-export interface ProjectAnalysis {
-  discover(): Promise<ProjectMember[]>;
-}
+import { InterfaceDiscovery, ProjectMemberDiscovery, provideMemberDiscoveries } from './discovery';
+import { provideProgram, provideTypeChecker } from './typescript';
 
 export type ProjectAnalysisOptions = ProjectViewOptions;
 
-export function createAnalysis(options: ProjectAnalysisOptions): ProjectAnalysis {
-  const di = new Container({ autobind: true, defaultScope: 'Singleton' });
+export function createAnalysis(options: ProjectAnalysisOptions) {
   const program = getProgramFromProjectViewOptions(options);
 
-  di.bind(PROGRAM).toConstantValue(program);
-  di.bind(TYPE_CHECKER).toDynamicValue((context) =>
-    context.get<typeof program>(PROGRAM).getTypeChecker()
-  );
+  const injector = ReflectiveInjector.resolveAndCreate([
+    provideProgram(program),
+    provideTypeChecker(),
+
+    provideMemberDiscoveries([InterfaceDiscovery]),
+  ]);
 
   // 1. Discover project files
   const sourceFiles = program.getSourceFiles();
   // 2. Discover project members
   const discover = () => {
+    const discoveries: ProjectMemberDiscovery[] = injector.get(ProjectMemberDiscovery);
     // Parallelize the discovery over all source files and discoveries asynchronously
-    const discoveries = di.getAll(ProjectMemberDiscovery);
     const promises = sourceFiles.flatMap((sourceFile) => {
       return discoveries.flatMap(async (discovery) => discovery.fromSourceFile(sourceFile));
     });

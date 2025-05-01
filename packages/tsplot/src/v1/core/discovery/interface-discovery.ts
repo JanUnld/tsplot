@@ -1,5 +1,4 @@
 import { includes, query as tsquery } from '@phenomnomnominal/tsquery';
-import { injectable, injectFromBase } from 'inversify';
 import * as ts from 'typescript';
 import {
   ProjectMember,
@@ -17,8 +16,6 @@ export interface InterfaceProjectMember extends ProjectMember {
   methods: unknown;
 }
 
-@injectable()
-@injectFromBase({ extendProperties: true })
 export class InterfaceDiscovery extends ProjectMemberDiscovery<InterfaceProjectMember> {
   override query(sourceFile: ts.SourceFile): ts.Node[] {
     return tsquery(sourceFile, 'InterfaceDeclaration');
