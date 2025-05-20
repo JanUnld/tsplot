@@ -2,8 +2,6 @@ import * as ts from 'typescript';
 import { createSourceFile, createTestingProgram, TestingProgram } from '../../testing';
 
 describe('ProjectMemberDiscovery', () => {
-  const TS = ts;
-
   let program: TestingProgram;
   let sourceFile: ts.SourceFile;
 

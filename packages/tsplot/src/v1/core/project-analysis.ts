@@ -1,34 +1,37 @@
 import { ReflectiveInjector } from 'injection-js';
 import { getProgramFromProjectViewOptions, ProjectViewOptions } from '../../lib';
-import { InterfaceDiscovery, ProjectMemberDiscovery, provideMemberDiscoveries } from './discovery';
+import { InterfaceDiscoveryStrategy, provideMemberDiscoveryStrategies } from './discovery';
+import { ProjectDiscovery } from './phases';
 import { provideProgram, provideTypeChecker } from './typescript';
 
 export type ProjectAnalysisOptions = ProjectViewOptions;
 
-export function createAnalysis(options: ProjectAnalysisOptions) {
+// Desired use-cases for `createProjectAnalysis`:
+// - Project analysis with an existing `ts.Program`
+// - Project analysis with an existing `ProjectAnalysis`
+// - Project analysis with a `tsconfig` json file path
+// - Project analysis with a `ts.ParsedCommandLine` object (parsed `tsconfig`)
+
+export function createProjectAnalysis(options: ProjectAnalysisOptions) {
   const program = getProgramFromProjectViewOptions(options);
 
   const injector = ReflectiveInjector.resolveAndCreate([
     provideProgram(program),
     provideTypeChecker(),
 
-    provideMemberDiscoveries([InterfaceDiscovery]),
+    provideMemberDiscoveryStrategies([InterfaceDiscoveryStrategy]),
+
+    ProjectDiscovery,
   ]);
 
-  // 1. Discover project files
-  const sourceFiles = program.getSourceFiles();
+  // 1. Discover project sources (files)
   // 2. Discover project members
-  const discover = () => {
-    const discoveries: ProjectMemberDiscovery[] = injector.get(ProjectMemberDiscovery);
-    // Parallelize the discovery over all source files and discoveries asynchronously
-    const promises = sourceFiles.flatMap((sourceFile) => {
-      return discoveries.flatMap(async (discovery) => discovery.fromSourceFile(sourceFile));
-    });
-    return Promise.all(promises).then((r) => r.flat());
-  };
-
   // 3. Discover dependencies
   // 4. Discover codeflow (future feature)
 
-  return {};
+  return {
+    discover(): ProjectDiscovery {
+      return injector.get(ProjectDiscovery);
+    },
+  };
 }
