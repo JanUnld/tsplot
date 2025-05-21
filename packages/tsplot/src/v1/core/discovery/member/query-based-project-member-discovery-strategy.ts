@@ -1,8 +1,8 @@
 import { inject } from 'injection-js';
 import * as ts from 'typescript';
-import { TYPE_CHECKER } from '../typescript';
+import { formatUniqueName } from '../../../utils';
+import { TYPE_CHECKER } from '../../typescript';
 import {
-  formatUniqueName,
   ProjectMember,
   ProjectMemberDiscoveryStrategy,
   ProjectMemberReflection,
@@ -15,7 +15,7 @@ export abstract class QueryBasedProjectMemberDiscoveryStrategy extends ProjectMe
   abstract queryNodesFromSourceFile(sourceFile: ts.SourceFile): readonly ts.Node[];
   abstract reflectProjectMember(member: ProjectMember): ProjectMemberReflection;
 
-  getReflectedProjectMembersFromNode(node: ts.Node): ReflectedProjectMember {
+  override getReflectedProjectMembersFromNode(node: ts.Node): ReflectedProjectMember {
     const symbol = this.typeChecker.getSymbolAtLocation(node);
     const type = this.typeChecker.getTypeAtLocation(node);
 
@@ -29,7 +29,9 @@ export abstract class QueryBasedProjectMemberDiscoveryStrategy extends ProjectMe
 
     return { ...member, ...props } as ReflectedProjectMember;
   }
-  getReflectedProjectMemberFromSourceFile(sourceFile: ts.SourceFile): ReflectedProjectMember[] {
+  override getReflectedProjectMembersFromSourceFile(
+    sourceFile: ts.SourceFile
+  ): ReflectedProjectMember[] {
     return this.queryNodesFromSourceFile(sourceFile).map(
       this.getReflectedProjectMembersFromNode.bind(this)
     );

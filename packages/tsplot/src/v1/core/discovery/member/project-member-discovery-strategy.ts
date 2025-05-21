@@ -13,19 +13,14 @@ export interface ProjectMember {
 export type ProjectMemberReflection = Record<string, unknown>;
 export type ReflectedProjectMember = ProjectMember & ProjectMemberReflection;
 
-export function formatUniqueName(symbol: ts.Symbol, sourceFile?: ts.SourceFile): string {
-  const fileName = sourceFile?.fileName ?? symbol.valueDeclaration?.getSourceFile().fileName;
-  return `${fileName}#${symbol.escapedName}`;
-}
-
 export abstract class ProjectMemberDiscoveryStrategy {
   abstract getReflectedProjectMembersFromNode(node: ts.Node): ReflectedProjectMember;
-  abstract getReflectedProjectMemberFromSourceFile(
+  abstract getReflectedProjectMembersFromSourceFile(
     sourceFile: ts.SourceFile
   ): ReflectedProjectMember[];
 }
 
-export function provideMemberDiscoveryStrategy(
+export function provideProjectMemberDiscoveryStrategy(
   impl: Type<ProjectMemberDiscoveryStrategy>
 ): Provider {
   return {
@@ -35,8 +30,8 @@ export function provideMemberDiscoveryStrategy(
   };
 }
 
-export function provideMemberDiscoveryStrategies(
+export function provideProjectMemberDiscoveryStrategies(
   impls: Type<ProjectMemberDiscoveryStrategy>[]
 ): Provider[] {
-  return impls?.map(provideMemberDiscoveryStrategy) ?? [];
+  return impls?.map(provideProjectMemberDiscoveryStrategy) ?? [];
 }

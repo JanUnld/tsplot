@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import { createSourceFile, createTestingProgram, TestingProgram } from '../../testing';
+import { createSourceFile, createTestingProgram, TestingProgram } from '../../../testing';
 
 describe('ProjectMemberDiscovery', () => {
   let program: TestingProgram;

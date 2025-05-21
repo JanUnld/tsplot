@@ -1,8 +1,12 @@
 import { ReflectiveInjector } from 'injection-js';
 import { getProgramFromProjectViewOptions, ProjectViewOptions } from '../../lib';
-import { InterfaceDiscoveryStrategy, provideMemberDiscoveryStrategies } from './discovery';
-import { ProjectDiscovery } from './phases';
-import { provideProgram, provideTypeChecker } from './typescript';
+import { InMemoryCache, provideProjectMemberCache } from './cache';
+import {
+  InterfaceDiscoveryStrategy,
+  ProjectMemberDiscovery,
+  provideProjectMemberDiscoveryStrategies,
+} from './discovery';
+import { provideProgram, provideSourceFileResolver, provideTypeChecker } from './typescript';
 
 export type ProjectAnalysisOptions = ProjectViewOptions;
 
@@ -18,10 +22,12 @@ export function createProjectAnalysis(options: ProjectAnalysisOptions) {
   const injector = ReflectiveInjector.resolveAndCreate([
     provideProgram(program),
     provideTypeChecker(),
+    provideSourceFileResolver(),
 
-    provideMemberDiscoveryStrategies([InterfaceDiscoveryStrategy]),
+    provideProjectMemberCache(InMemoryCache),
+    provideProjectMemberDiscoveryStrategies([InterfaceDiscoveryStrategy]),
 
-    ProjectDiscovery,
+    ProjectMemberDiscovery,
   ]);
 
   // 1. Discover project sources (files)
@@ -30,8 +36,8 @@ export function createProjectAnalysis(options: ProjectAnalysisOptions) {
   // 4. Discover codeflow (future feature)
 
   return {
-    discover(): ProjectDiscovery {
-      return injector.get(ProjectDiscovery);
+    discover(): ProjectMemberDiscovery {
+      return injector.get(ProjectMemberDiscovery);
     },
   };
 }
