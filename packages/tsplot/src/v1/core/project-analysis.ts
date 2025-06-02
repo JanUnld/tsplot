@@ -1,11 +1,20 @@
 import { ReflectiveInjector } from 'injection-js';
 import { getProgramFromProjectViewOptions, ProjectViewOptions } from '../../lib';
-import { InMemoryCache, provideProjectMemberCache } from './cache';
 import {
+  InMemoryCache,
+  PROJECT_MEMBER_CACHE,
+  ProjectMemberCache,
+  provideProjectMemberCache,
+} from './cache';
+import {
+  AssociationDependencyDiscoveryStrategy,
+  HeritageDependencyDiscoveryStrategy,
   InterfaceDiscoveryStrategy,
   ProjectMemberDiscovery,
+  provideDependencyDiscoveryStrategies,
   provideProjectMemberDiscoveryStrategies,
 } from './discovery';
+import { NodeReflector } from './discovery/node-reflector';
 import { provideProgram, provideSourceFileResolver, provideTypeChecker } from './typescript';
 
 export type ProjectAnalysisOptions = ProjectViewOptions;
@@ -27,6 +36,12 @@ export function createProjectAnalysis(options: ProjectAnalysisOptions) {
     provideProjectMemberCache(InMemoryCache),
     provideProjectMemberDiscoveryStrategies([InterfaceDiscoveryStrategy]),
 
+    provideDependencyDiscoveryStrategies([
+      AssociationDependencyDiscoveryStrategy,
+      HeritageDependencyDiscoveryStrategy,
+    ]),
+
+    NodeReflector,
     ProjectMemberDiscovery,
   ]);
 
@@ -35,9 +50,8 @@ export function createProjectAnalysis(options: ProjectAnalysisOptions) {
   // 3. Discover dependencies
   // 4. Discover codeflow (future feature)
 
-  return {
-    discover(): ProjectMemberDiscovery {
-      return injector.get(ProjectMemberDiscovery);
-    },
-  };
+  const projectMemberDiscovery: ProjectMemberDiscovery = injector.get(ProjectMemberDiscovery);
+  const projectMemberCache: ProjectMemberCache = injector.get(PROJECT_MEMBER_CACHE);
+
+  return { projectMemberDiscovery, projectMemberCache };
 }

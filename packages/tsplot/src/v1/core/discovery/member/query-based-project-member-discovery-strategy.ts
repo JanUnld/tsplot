@@ -1,7 +1,6 @@
 import { inject } from 'injection-js';
 import * as ts from 'typescript';
-import { formatUniqueName } from '../../../utils';
-import { TYPE_CHECKER } from '../../typescript';
+import { NodeReflector } from '../node-reflector';
 import {
   ProjectMember,
   ProjectMemberDiscoveryStrategy,
@@ -10,19 +9,16 @@ import {
 } from './project-member-discovery-strategy';
 
 export abstract class QueryBasedProjectMemberDiscoveryStrategy extends ProjectMemberDiscoveryStrategy {
-  readonly typeChecker = inject(TYPE_CHECKER);
+  protected readonly nodeReflector = inject(NodeReflector);
 
   abstract queryNodesFromSourceFile(sourceFile: ts.SourceFile): readonly ts.Node[];
   abstract reflectProjectMember(member: ProjectMember): ProjectMemberReflection;
 
   override getReflectedProjectMembersFromNode(node: ts.Node): ReflectedProjectMember {
-    const symbol = this.typeChecker.getSymbolAtLocation(node);
-    const type = this.typeChecker.getTypeAtLocation(node);
-
-    if (!symbol) throw new Error('No symbol found for the given node');
+    const { symbol, type } = this.nodeReflector.reflectNodeOrThrow(node);
 
     const name = symbol.name;
-    const uniqueName = formatUniqueName(symbol);
+    const uniqueName = this.nodeReflector.formatUniqueName(node);
 
     const member: ProjectMember = { node, symbol, type, name, uniqueName };
     const props = this.reflectProjectMember(member);

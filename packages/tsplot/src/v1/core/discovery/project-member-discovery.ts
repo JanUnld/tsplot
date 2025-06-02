@@ -3,7 +3,7 @@ import * as ts from 'typescript';
 import { Predicate } from '../../../lib';
 import { PROJECT_MEMBER_CACHE, setCacheEntries } from '../cache';
 import { PROGRAM, SOURCE_FILE_RESOLVER } from '../typescript';
-import { ProjectMemberDiscoveryStrategy } from './member';
+import { ProjectMemberDiscoveryStrategy, ReflectedProjectMember } from './member';
 
 export class ProjectMemberDiscovery {
   protected readonly program = inject(PROGRAM);
@@ -15,32 +15,32 @@ export class ProjectMemberDiscovery {
     ProjectMemberDiscoveryStrategy
   );
 
-  async getProjectMembers(options?: { filter?: Predicate<ts.SourceFile> }) {
+  getProjectMembers(options?: { filter?: Predicate<ts.SourceFile> }): ReflectedProjectMember[] {
     const { filter } = options ?? {};
     const sourceFiles = this.program.getSourceFiles().filter((sourceFile) => {
       // todo: consider identifying external files, that are not part of the project (e.g. node_modules)
       return !sourceFile.isDeclarationFile && (!filter || filter(sourceFile));
     });
 
-    return sourceFiles.flatMap(this.getProjectMembersFromSourceFile);
+    return this._getAndCacheProjectMembers(sourceFiles);
   }
 
-  async getProjectMembersFromSourceFile(sourceFileOrName: ts.SourceFile | string) {
+  getProjectMembersFromSourceFile(
+    sourceFileOrName: ts.SourceFile | string
+  ): ReflectedProjectMember[] {
     const sourceFile = this.getSourceFile(sourceFileOrName);
     const isMissingSourceFile = sourceFile == null;
     // early out if no source file is given
     return isMissingSourceFile ? [] : this._getAndCacheProjectMembers([sourceFile]);
   }
 
-  private async _getAndCacheProjectMembers(sourceFiles: ts.SourceFile[]) {
+  private _getAndCacheProjectMembers(sourceFiles: ts.SourceFile[]) {
     // Discover project members in parallel for each source file and discovery
-    const promises = sourceFiles.flatMap((sourceFile) => {
-      return this.strategies.flatMap(async (strat) =>
+    const members = sourceFiles.flatMap((sourceFile) => {
+      return this.strategies.flatMap((strat) =>
         strat.getReflectedProjectMembersFromSourceFile(sourceFile)
       );
     });
-    // Wait for all promises to resolve and flatten the result
-    const members = await Promise.all(promises).then((reflectedMembers) => reflectedMembers.flat());
 
     setCacheEntries(
       this.cache,
